@@ -1,0 +1,544 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Close the Deal — A Legal Literacy Game for SaaS AEs</title>
+<style>
+  :root {
+    --bg: #0f1222;
+    --panel: #181c32;
+    --panel-2: #1f2441;
+    --ink: #eef0ff;
+    --muted: #9aa0c7;
+    --accent: #7c9cff;
+    --good: #4ade80;
+    --warn: #fbbf24;
+    --bad: #f87171;
+    --border: #2a2f55;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: radial-gradient(1200px 800px at 20% -10%, #1a1f45 0%, var(--bg) 60%);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    min-height: 100vh;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 32px 20px 80px; }
+  header h1 {
+    font-size: 26px; margin: 0 0 4px;
+    letter-spacing: -0.01em;
+  }
+  header p { color: var(--muted); margin: 0 0 24px; font-size: 14px; }
+ 
+  .meters {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 14px; padding: 14px 16px; margin-bottom: 20px;
+  }
+  .meter .label {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 12px; color: var(--muted); margin-bottom: 6px;
+    text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .meter .value { color: var(--ink); font-weight: 600; }
+  .bar {
+    height: 8px; border-radius: 999px; background: #2a2f55; overflow: hidden;
+  }
+  .bar > span {
+    display: block; height: 100%;
+    transition: width .35s ease;
+  }
+  .bar.velocity > span { background: linear-gradient(90deg, #60a5fa, #7c9cff); }
+  .bar.risk > span { background: linear-gradient(90deg, #4ade80, #fbbf24, #f87171); }
+  .bar.relation > span { background: linear-gradient(90deg, #f472b6, #a78bfa); }
+ 
+  .card {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 16px; padding: 22px 22px 18px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.35);
+  }
+  .tag {
+    display: inline-block; font-size: 11px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--accent);
+    background: rgba(124,156,255,0.12); border: 1px solid rgba(124,156,255,0.3);
+    padding: 4px 8px; border-radius: 999px; margin-bottom: 10px;
+  }
+  .scene-title { font-size: 20px; margin: 2px 0 10px; }
+  .scene-body {
+    color: #d7daf5; line-height: 1.55; font-size: 15px;
+    background: var(--panel-2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px 16px; margin: 10px 0 16px;
+    white-space: pre-wrap;
+  }
+  .scene-body em { color: var(--muted); font-style: normal; }
+ 
+  .choices { display: grid; gap: 10px; }
+  .choice {
+    text-align: left; cursor: pointer;
+    background: var(--panel-2); color: var(--ink);
+    border: 1px solid var(--border); border-radius: 12px;
+    padding: 14px 16px; font-size: 14px; line-height: 1.5;
+    transition: transform .06s ease, border-color .15s ease, background .15s ease;
+  }
+  .choice:hover { border-color: var(--accent); background: #232853; }
+  .choice:active { transform: translateY(1px); }
+ 
+  .coach {
+    margin-top: 14px; padding: 14px 16px;
+    background: #121636; border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 10px; font-size: 14px; line-height: 1.55;
+  }
+  .coach h4 {
+    margin: 0 0 6px; font-size: 12px; color: var(--accent);
+    text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .deltas {
+    display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;
+    font-size: 12px; color: var(--muted);
+  }
+  .delta { padding: 3px 8px; border-radius: 999px; border: 1px solid var(--border); }
+  .delta.pos { color: var(--good); border-color: #1f4a36; background: #0e2b1f; }
+  .delta.neg { color: var(--bad); border-color: #4a1f1f; background: #2b0e0e; }
+  .delta.neu { color: var(--muted); }
+ 
+  .controls { display: flex; justify-content: space-between; margin-top: 16px; }
+  button.primary {
+    background: var(--accent); color: #0b0f22; border: none;
+    padding: 10px 16px; border-radius: 10px; font-weight: 600;
+    cursor: pointer; font-size: 14px;
+  }
+  button.ghost {
+    background: transparent; color: var(--muted); border: 1px solid var(--border);
+    padding: 10px 14px; border-radius: 10px; cursor: pointer; font-size: 13px;
+  }
+  button.primary:hover { filter: brightness(1.08); }
+  button.ghost:hover { color: var(--ink); border-color: var(--accent); }
+ 
+  .grade {
+    text-align: center; padding: 12px 0 4px;
+  }
+  .grade .big {
+    font-size: 52px; font-weight: 700; letter-spacing: -0.02em;
+    background: linear-gradient(90deg, #7c9cff, #a78bfa);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .grade .sub { color: var(--muted); margin-top: 4px; }
+ 
+  footer { color: var(--muted); font-size: 12px; margin-top: 24px; text-align: center; }
+  footer b { color: #cfd3f5; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Close the Deal</h1>
+      <p>A legal literacy game for SaaS account executives. One deal. Six decisions. No lawyers harmed.</p>
+    </header>
+ 
+    <section class="meters" id="meters"></section>
+    <section id="stage"></section>
+ 
+    <footer>
+      MVP v0.1 &middot; Fictional company, fictional clauses &middot; Not legal advice. Always loop in <b>real</b> counsel on <b>real</b> deals.
+    </footer>
+  </div>
+ 
+<script>
+/* ----------------------------------------------------------------------
+ * Close the Deal — MVP scenario engine
+ * Everything is data-driven from the SCENARIO object below so non-coders
+ * can add steps later by editing JSON-ish structures.
+ * -------------------------------------------------------------------- */
+ 
+const METERS = {
+  velocity:   { label: "Deal Velocity",        start: 60 },
+  risk:       { label: "Legal Risk Exposure",  start: 20 },
+  relation:   { label: "Customer Relationship", start: 70 },
+};
+ 
+/* Each step has:
+ *   tag:    small label shown above the title
+ *   title:  short scene title
+ *   body:   the email / situation text (supports \n)
+ *   choices: array of { label, deltas:{velocity,risk,relation}, coach }
+ */
+const SCENARIO = {
+  title: "Closing Acme Corp — $250K ARR",
+  intro:
+    "You're Jordan, an AE at CloudForge (a fictional SaaS analytics platform).\n" +
+    "Acme Corp — a mid-market retailer — is ready to buy. Procurement just entered the chat.\n" +
+    "Your goal: close the deal without signing anything your legal team will regret.",
+  steps: [
+    {
+      tag: "Step 1 — Paper Precedence",
+      title: "Whose template do we use?",
+      body:
+        "From: priya.s@acme.example\n" +
+        "Subject: Contracting — next steps\n\n" +
+        "Hi Jordan — great demo yesterday. To move quickly, please use the attached Acme Master Services Agreement as the starting point. It's what we use with all vendors.\n\n" +
+        "— Priya, Procurement",
+      choices: [
+        {
+          label: "\"Sure, happy to work from your MSA to keep things moving.\"",
+          deltas: { velocity: +8, risk: +25, relation: +3 },
+          coach:
+            "Whose paper you start from often decides 70% of the final contract. " +
+            "Customer templates usually bake in unlimited liability, broad indemnities, and audit rights your legal team would never volunteer. " +
+            "Agreeing here silently concedes the negotiation before it begins."
+        },
+        {
+          label: "\"Our legal team requires we start from our MSA. I'll send it now — it's short and fair.\"",
+          deltas: { velocity: -3, risk: -15, relation: -2 },
+          coach:
+            "Correct move. Politely but firmly insisting on your paper is standard professional practice, not rudeness. " +
+            "A confident, friendly redirect ('our MSA is short and customer-friendly — happy to walk you through it') protects the deal and the relationship."
+        },
+        {
+          label: "Forward the email to legal without replying and wait.",
+          deltas: { velocity: -12, risk: -5, relation: -5 },
+          coach:
+            "Escalation has its place — but not for a routine paper-precedence question you're trained to handle. " +
+            "Legal teams get grumpy when flooded with questions AEs should answer themselves. Save escalation for genuine red flags."
+        }
+      ]
+    },
+    {
+      tag: "Step 2 — Liability Cap",
+      title: "The uncapped liability redline",
+      body:
+        "Acme's counsel redlines section 12:\n\n" +
+        "\"Notwithstanding anything to the contrary, Provider's liability shall be UNLIMITED for (i) data breaches, (ii) breaches of confidentiality, and (iii) any third-party IP infringement claims.\"\n\n" +
+        "Priya: \"Our legal says this is standard — can you accept so we can get to signature this week?\"",
+      choices: [
+        {
+          label: "\"Standard for us too — accepted.\"",
+          deltas: { velocity: +10, risk: +35, relation: +5 },
+          coach:
+            "This is the single most expensive mistake an AE can make. " +
+            "Uncapped liability on data breach alone can bankrupt a SaaS company on a $250K deal. " +
+            "There is nothing 'standard' about unlimited liability — customers say that because it works."
+        },
+        {
+          label: "\"We can't do unlimited, but we'll offer a super-cap of 2x fees for those carve-outs. Let me loop in legal to finalize.\"",
+          deltas: { velocity: -2, risk: -5, relation: 0 },
+          coach:
+            "Textbook move. A 'super-cap' (e.g. 2x–3x annual fees) for sensitive carve-outs is the industry compromise. " +
+            "You're showing you understand the ask without handing over the keys. This is also a legitimate moment to loop in legal — the dollar math belongs to them."
+        },
+        {
+          label: "\"Let me check internally.\" (Say nothing, stall, hope it goes away.)",
+          deltas: { velocity: -10, risk: +5, relation: -8 },
+          coach:
+            "Silence on a liability redline reads as either incompetence or bad faith. " +
+            "It also doesn't remove the risk — it just delays it and erodes trust. Name the issue, propose a path, move on."
+        }
+      ]
+    },
+    {
+      tag: "Step 3 — Auto-Renewal",
+      title: "Strike the auto-renewal?",
+      body:
+        "Priya: \"Our policy is no auto-renewal clauses. Can we strike section 3.2 and require a fresh signature each year?\"",
+      choices: [
+        {
+          label: "\"No problem, we'll strike it.\"",
+          deltas: { velocity: +6, risk: 0, relation: +6 },
+          coach:
+            "Not wrong — but you gave up commercial value for free. Auto-renewal isn't a legal risk issue; it's a revenue retention mechanic. " +
+            "CS and finance will feel this in 12 months when renewal slips into Q2."
+        },
+        {
+          label: "\"How about auto-renew with a 60-day opt-out notice window? You stay in control, we keep planning visibility.\"",
+          deltas: { velocity: +2, risk: 0, relation: +2 },
+          coach:
+            "Best answer. The 60-day notice window is the standard middle ground: the customer is never 'stuck', but the default preserves renewal flow. " +
+            "Knowing the difference between a legal issue and a commercial issue is half the job."
+        },
+        {
+          label: "\"Auto-renewal is non-negotiable in our paper.\"",
+          deltas: { velocity: -8, risk: 0, relation: -10 },
+          coach:
+            "Very few clauses are truly non-negotiable, and auto-renewal isn't one of them. Dying on this hill costs you more than it protects."
+        }
+      ]
+    },
+    {
+      tag: "Step 4 — IP & Feedback",
+      title: "Who owns the feedback?",
+      body:
+        "A late redline appears in section 9:\n\n" +
+        "\"Any feedback, suggestions, or improvement ideas provided by Customer shall remain the exclusive property of Customer, and Provider shall not incorporate them into the Service without a separate written license.\"",
+      choices: [
+        {
+          label: "Accept — it's only feedback, how bad can it be?",
+          deltas: { velocity: +5, risk: +20, relation: +2 },
+          coach:
+            "Very bad. If you build a feature inspired by any customer conversation, you've just created an IP claim against your own roadmap. " +
+            "Multiply by every enterprise customer who copies this clause — product development becomes a minefield."
+        },
+        {
+          label: "Counter: \"Feedback is provided on a non-confidential, royalty-free basis and may be freely used by Provider.\"",
+          deltas: { velocity: -2, risk: -10, relation: 0 },
+          coach:
+            "Correct. The standard 'feedback license' clause exists for exactly this reason. Every mature SaaS MSA has a version of it. " +
+            "Customers usually accept it once you explain that it protects the roadmap for everyone, including them."
+        },
+        {
+          label: "Escalate to legal immediately.",
+          deltas: { velocity: -6, risk: -5, relation: -3 },
+          coach:
+            "You could have handled this with a one-line redline from memory. Escalation is fine, but part of AE maturity is recognizing which clauses you can redline yourself."
+        }
+      ]
+    },
+    {
+      tag: "Step 5 — Data Residency & Subprocessors",
+      title: "The security addendum ask",
+      body:
+        "Acme's InfoSec: \"All customer data must remain in the EU. We also need to pre-approve every subprocessor, and we don't accept any US-based ones.\"",
+      choices: [
+        {
+          label: "\"Yes to all of that, sounds reasonable.\"",
+          deltas: { velocity: +10, risk: +30, relation: +5 },
+          coach:
+            "You just promised something you almost certainly can't deliver. CloudForge's auth provider, CDN, and error tracker are probably all US-based. " +
+            "Promising data residency you can't honor is a breach waiting to happen — and regulators take it seriously under GDPR."
+        },
+        {
+          label: "\"Let me check with our security team on what we can actually commit to, and come back with our DPA and subprocessor list.\"",
+          deltas: { velocity: -4, risk: -10, relation: 0 },
+          coach:
+            "Right answer. Data residency and subprocessors are technical commitments, not commercial ones. " +
+            "You don't make promises about infrastructure you don't control. Bring the DPA and current subprocessor list — then negotiate from facts."
+        },
+        {
+          label: "\"Those aren't things we offer. Next topic?\"",
+          deltas: { velocity: -10, risk: -2, relation: -12 },
+          coach:
+            "Dismissing a regulated customer's data concerns is how deals die. Even if the answer is eventually 'no', the journey matters."
+        }
+      ]
+    },
+    {
+      tag: "Step 6 — Signing Day",
+      title: "\"One last thing...\"",
+      body:
+        "Acme's CFO, on the closing call: \"Jordan, I love the product. Before I sign — can we get a 30-day termination-for-convenience clause? Just as a safety net. It won't be used.\"",
+      choices: [
+        {
+          label: "\"Done. 30-day termination for convenience, we'll get it into the final draft.\"",
+          deltas: { velocity: +12, risk: +25, relation: +8 },
+          coach:
+            "It's never 'just a safety net'. Termination for convenience turns an annual contract into a month-to-month deal, destroys forecast accuracy, and invalidates any multi-year discount you gave. " +
+            "Finance will have opinions."
+        },
+        {
+          label: "\"We don't offer termination for convenience on annual deals, but here's our uptime SLA with service credits — that's your real safety net.\"",
+          deltas: { velocity: +2, risk: -5, relation: +2 },
+          coach:
+            "Beautiful pivot. You reframed a legal concession as a commercial reassurance. " +
+            "SLA credits are bounded, pre-agreed, and give the customer what they actually want: confidence that the service will work."
+        },
+        {
+          label: "\"Let me escalate to legal and get back to you tomorrow.\"",
+          deltas: { velocity: -5, risk: 0, relation: -4 },
+          coach:
+            "On the signing call, 'let me get back to you' is the sound of a deal slipping a week. You're trained for this one — handle it in the room."
+        }
+      ]
+    }
+  ]
+};
+ 
+/* --------------------------- engine --------------------------------- */
+ 
+const state = {
+  stepIndex: 0,
+  meters: { ...Object.fromEntries(Object.entries(METERS).map(([k,v]) => [k, v.start])) },
+  finished: false,
+  awaitingNext: false,
+  lastCoach: null,
+};
+ 
+const $meters = document.getElementById("meters");
+const $stage  = document.getElementById("stage");
+ 
+function clamp(n) { return Math.max(0, Math.min(100, n)); }
+ 
+function renderMeters() {
+  $meters.innerHTML = Object.entries(METERS).map(([key, def]) => {
+    const val = clamp(state.meters[key]);
+    const barClass = key === "relation" ? "relation" : key;
+    return `
+      <div class="meter">
+        <div class="label"><span>${def.label}</span><span class="value">${val}</span></div>
+        <div class="bar ${barClass}"><span style="width:${val}%"></span></div>
+      </div>`;
+  }).join("");
+}
+ 
+function renderStep() {
+  if (state.finished) return renderEnd();
+ 
+  if (state.stepIndex === 0 && !state.awaitingNext && !state.lastCoach) {
+    // Intro card
+    $stage.innerHTML = `
+      <div class="card">
+        <span class="tag">Scenario</span>
+        <h2 class="scene-title">${SCENARIO.title}</h2>
+        <div class="scene-body">${SCENARIO.intro.replace(/\n/g,"<br/>")}</div>
+        <div class="controls">
+          <span></span>
+          <button class="primary" id="startBtn">Start the deal →</button>
+        </div>
+      </div>`;
+    document.getElementById("startBtn").onclick = () => {
+      state.awaitingNext = false;
+      state.lastCoach = null;
+      renderStep();
+    };
+    return;
+  }
+ 
+  const step = SCENARIO.steps[state.stepIndex];
+  $stage.innerHTML = `
+    <div class="card">
+      <span class="tag">${step.tag}</span>
+      <h2 class="scene-title">${step.title}</h2>
+      <div class="scene-body">${step.body.replace(/\n/g,"<br/>")}</div>
+      <div class="choices" id="choices"></div>
+      <div id="coachSlot"></div>
+      <div class="controls" id="controls"></div>
+    </div>`;
+ 
+  const $choices = document.getElementById("choices");
+  step.choices.forEach((c, i) => {
+    const btn = document.createElement("button");
+    btn.className = "choice";
+    btn.textContent = c.label;
+    btn.onclick = () => pickChoice(i);
+    $choices.appendChild(btn);
+  });
+}
+ 
+function pickChoice(i) {
+  const step = SCENARIO.steps[state.stepIndex];
+  const choice = step.choices[i];
+ 
+  // apply deltas (risk increases are "bad", so higher = worse)
+  for (const [k, v] of Object.entries(choice.deltas)) {
+    state.meters[k] = clamp(state.meters[k] + v);
+  }
+  renderMeters();
+ 
+  // disable choice buttons
+  document.querySelectorAll(".choice").forEach(b => {
+    b.disabled = true;
+    b.style.opacity = 0.55;
+    b.style.cursor = "default";
+  });
+  // highlight chosen
+  document.querySelectorAll(".choice")[i].style.borderColor = "var(--accent)";
+  document.querySelectorAll(".choice")[i].style.opacity = 1;
+ 
+  // show coach
+  const deltasHtml = Object.entries(choice.deltas).map(([k,v]) => {
+    if (v === 0) return `<span class="delta neu">${METERS[k].label}: 0</span>`;
+    // Risk: positive delta = bad. Others: positive = good.
+    const isGood = (k === "risk") ? (v < 0) : (v > 0);
+    const cls = isGood ? "pos" : "neg";
+    const sign = v > 0 ? "+" : "";
+    return `<span class="delta ${cls}">${METERS[k].label}: ${sign}${v}</span>`;
+  }).join("");
+ 
+  document.getElementById("coachSlot").innerHTML = `
+    <div class="coach">
+      <h4>Legal Coach</h4>
+      <div>${choice.coach}</div>
+      <div class="deltas">${deltasHtml}</div>
+    </div>`;
+ 
+  const nextLabel = state.stepIndex === SCENARIO.steps.length - 1 ? "See your result →" : "Next step →";
+  document.getElementById("controls").innerHTML =
+    `<span></span><button class="primary" id="nextBtn">${nextLabel}</button>`;
+  document.getElementById("nextBtn").onclick = advance;
+}
+ 
+function advance() {
+  if (state.stepIndex >= SCENARIO.steps.length - 1) {
+    state.finished = true;
+    renderEnd();
+    return;
+  }
+  state.stepIndex += 1;
+  state.lastCoach = null;
+  renderStep();
+}
+ 
+function grade() {
+  // Lower risk is better. Combine into a 0-100 composite.
+  const { velocity, risk, relation } = state.meters;
+  const score = Math.round((velocity * 0.25) + ((100 - risk) * 0.55) + (relation * 0.20));
+  let letter, headline, body;
+  if (score >= 85) {
+    letter = "A";
+    headline = "Deal closed. Legal bought you coffee.";
+    body = "You protected the company's risk posture without losing the relationship. This is what 'commercially sharp + legally aware' looks like.";
+  } else if (score >= 70) {
+    letter = "B";
+    headline = "Deal closed with minor redlines outstanding.";
+    body = "Solid AE work. A couple of concessions will show up at renewal, but nothing that'll wake anyone up at 3am.";
+  } else if (score >= 55) {
+    letter = "C";
+    headline = "Deal closed — but legal flagged issues for next cycle.";
+    body = "You got the signature. You also accepted commitments your team will have to live with. Worth a debrief with your SE and legal partner.";
+  } else if (score >= 40) {
+    letter = "D";
+    headline = "Deal closed. Six months later, regrets.";
+    body = "Uncapped exposure, unclear data residency, or an IP trap you didn't see. Revenue now, invoice from counsel later.";
+  } else {
+    letter = "F";
+    headline = "Deal closed. Bankruptcy-adjacent.";
+    body = "Somewhere in this contract is the clause that will someday be quoted in a deposition. Please replay.";
+  }
+  return { score, letter, headline, body };
+}
+ 
+function renderEnd() {
+  const g = grade();
+  $stage.innerHTML = `
+    <div class="card">
+      <span class="tag">Result</span>
+      <div class="grade">
+        <div class="big">${g.letter}</div>
+        <div class="sub">Composite score: ${g.score} / 100</div>
+      </div>
+      <h2 class="scene-title" style="text-align:center; margin-top:14px">${g.headline}</h2>
+      <div class="scene-body" style="text-align:center">${g.body}</div>
+      <div class="controls">
+        <button class="ghost" id="replayBtn">↺ Replay scenario</button>
+        <span style="color:var(--muted); font-size:12px; align-self:center">
+          More scenarios coming in v0.2
+        </span>
+      </div>
+    </div>`;
+  document.getElementById("replayBtn").onclick = () => {
+    state.stepIndex = 0;
+    state.finished = false;
+    state.awaitingNext = false;
+    state.lastCoach = null;
+    state.meters = Object.fromEntries(Object.entries(METERS).map(([k,v]) => [k, v.start]));
+    renderMeters();
+    renderStep();
+  };
+}
+ 
+/* --------------------------- boot ----------------------------------- */
+renderMeters();
+renderStep();
+</script>
+</body>
+</html>
