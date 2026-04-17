@@ -1,0 +1,885 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Close the Deal — A Legal Literacy Game for SaaS AEs</title>
+<style>
+  :root {
+    --bg: #0f1222;
+    --panel: #181c32;
+    --panel-2: #1f2441;
+    --ink: #eef0ff;
+    --muted: #9aa0c7;
+    --accent: #7c9cff;
+    --good: #4ade80;
+    --warn: #fbbf24;
+    --bad: #f87171;
+    --border: #2a2f55;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: radial-gradient(1200px 800px at 20% -10%, #1a1f45 0%, var(--bg) 60%);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    min-height: 100vh;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 32px 20px 80px; }
+  header h1 {
+    font-size: 26px; margin: 0 0 4px;
+    letter-spacing: -0.01em;
+  }
+  header p { color: var(--muted); margin: 0 0 24px; font-size: 14px; }
+
+  .meters {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 14px; padding: 14px 16px; margin-bottom: 20px;
+  }
+  .meter .label {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 12px; color: var(--muted); margin-bottom: 6px;
+    text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .meter .value { color: var(--ink); font-weight: 600; }
+  .bar {
+    height: 8px; border-radius: 999px; background: #2a2f55; overflow: hidden;
+  }
+  .bar > span {
+    display: block; height: 100%;
+    transition: width .35s ease;
+  }
+  .bar.velocity > span { background: linear-gradient(90deg, #60a5fa, #7c9cff); }
+  .bar.risk > span { background: linear-gradient(90deg, #4ade80, #fbbf24, #f87171); }
+  .bar.relation > span { background: linear-gradient(90deg, #f472b6, #a78bfa); }
+
+  .card {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 16px; padding: 22px 22px 18px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.35);
+  }
+  .tag {
+    display: inline-block; font-size: 11px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--accent);
+    background: rgba(124,156,255,0.12); border: 1px solid rgba(124,156,255,0.3);
+    padding: 4px 8px; border-radius: 999px; margin-bottom: 10px;
+  }
+  .scene-title { font-size: 20px; margin: 2px 0 10px; }
+  .scene-body {
+    color: #d7daf5; line-height: 1.55; font-size: 15px;
+    background: var(--panel-2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px 16px; margin: 10px 0 16px;
+    white-space: pre-wrap;
+  }
+  .scene-body em { color: var(--muted); font-style: normal; }
+
+  .choices { display: grid; gap: 10px; }
+  .choice {
+    text-align: left; cursor: pointer;
+    background: var(--panel-2); color: var(--ink);
+    border: 1px solid var(--border); border-radius: 12px;
+    padding: 14px 16px; font-size: 14px; line-height: 1.5;
+    transition: transform .06s ease, border-color .15s ease, background .15s ease;
+  }
+  .choice:hover { border-color: var(--accent); background: #232853; }
+  .choice:active { transform: translateY(1px); }
+
+  .coach {
+    margin-top: 14px; padding: 14px 16px;
+    background: #121636; border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 10px; font-size: 14px; line-height: 1.55;
+  }
+  .coach h4 {
+    margin: 0 0 6px; font-size: 12px; color: var(--accent);
+    text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .deltas {
+    display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;
+    font-size: 12px; color: var(--muted);
+  }
+  .delta { padding: 3px 8px; border-radius: 999px; border: 1px solid var(--border); }
+  .delta.pos { color: var(--good); border-color: #1f4a36; background: #0e2b1f; }
+  .delta.neg { color: var(--bad); border-color: #4a1f1f; background: #2b0e0e; }
+  .delta.neu { color: var(--muted); }
+
+  .controls { display: flex; justify-content: space-between; margin-top: 16px; }
+  button.primary {
+    background: var(--accent); color: #0b0f22; border: none;
+    padding: 10px 16px; border-radius: 10px; font-weight: 600;
+    cursor: pointer; font-size: 14px;
+  }
+  button.ghost {
+    background: transparent; color: var(--muted); border: 1px solid var(--border);
+    padding: 10px 14px; border-radius: 10px; cursor: pointer; font-size: 13px;
+  }
+  button.primary:hover { filter: brightness(1.08); }
+  button.ghost:hover { color: var(--ink); border-color: var(--accent); }
+
+  .grade {
+    text-align: center; padding: 12px 0 4px;
+  }
+  .grade .big {
+    font-size: 52px; font-weight: 700; letter-spacing: -0.02em;
+    background: linear-gradient(90deg, #7c9cff, #a78bfa);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .grade .sub { color: var(--muted); margin-top: 4px; }
+
+  footer { color: var(--muted); font-size: 12px; margin-top: 24px; text-align: center; }
+  footer b { color: #cfd3f5; }
+
+  /* --- Home screen / scenario picker --- */
+  .progress-summary {
+    display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;
+    margin-bottom: 22px; font-size: 13px; color: var(--muted);
+  }
+  .progress-summary .stat {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 10px; padding: 8px 14px;
+  }
+  .progress-summary .stat b { color: var(--ink); }
+
+  .home-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+  }
+  @media (max-width: 600px) { .home-grid { grid-template-columns: 1fr; } }
+
+  .scenario-card {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 16px; padding: 20px; cursor: pointer;
+    display: flex; flex-direction: column;
+    transition: border-color .15s ease, background .15s ease, transform .06s ease;
+    animation: fadeInUp .3s ease both;
+  }
+  .scenario-card:hover { border-color: var(--accent); background: #1c2148; }
+  .scenario-card:active { transform: translateY(1px); }
+  .scenario-card:nth-child(2) { animation-delay: .05s; }
+  .scenario-card:nth-child(3) { animation-delay: .10s; }
+  .scenario-card:nth-child(4) { animation-delay: .15s; }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .sc-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 10px;
+  }
+  .sc-icon { font-size: 28px; }
+  .sc-difficulty {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--muted); background: rgba(154,160,199,0.1);
+    padding: 3px 8px; border-radius: 999px; border: 1px solid var(--border);
+  }
+  .sc-difficulty.beginner     { color: var(--good); border-color: #1f4a36; background: #0e2b1f; }
+  .sc-difficulty.intermediate { color: var(--warn); border-color: #4a3a1f; background: #2b220e; }
+  .sc-difficulty.advanced     { color: var(--bad);  border-color: #4a1f1f; background: #2b0e0e; }
+
+  .sc-title { font-size: 17px; margin: 0 0 4px; color: var(--ink); }
+  .sc-subtitle { font-size: 13px; color: var(--muted); margin: 0 0 12px; }
+
+  .sc-topics { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+  .sc-topic {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent); background: rgba(124,156,255,0.08);
+    border: 1px solid rgba(124,156,255,0.2);
+    padding: 2px 7px; border-radius: 999px;
+  }
+
+  .sc-footer {
+    display: flex; justify-content: space-between; align-items: center;
+    border-top: 1px solid var(--border); padding-top: 12px; margin-top: auto;
+  }
+  .sc-best { font-size: 12px; color: var(--muted); }
+  .sc-best .grade-badge { font-weight: 700; }
+  .sc-play { font-size: 13px; font-weight: 600; color: var(--accent); }
+  .sc-steps { font-size: 11px; color: var(--muted); }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header id="appHeader"></header>
+
+    <section class="meters" id="meters"></section>
+    <section id="stage"></section>
+
+    <footer>
+      v0.2 &middot; Fictional company, fictional clauses &middot; Not legal advice. Always loop in <b>real</b> counsel on <b>real</b> deals.
+    </footer>
+  </div>
+
+<script>
+/* ----------------------------------------------------------------------
+ * Close the Deal — MVP scenario engine
+ * Everything is data-driven from the SCENARIOS array below so non-coders
+ * can add new scenarios or steps later by editing JSON-ish structures.
+ * -------------------------------------------------------------------- */
+
+const METERS = {
+  velocity:   { label: "Deal Velocity",        start: 60 },
+  risk:       { label: "Legal Risk Exposure",  start: 20 },
+  relation:   { label: "Customer Relationship", start: 70 },
+};
+
+/* Each step has:
+ *   tag:    small label shown above the title
+ *   title:  short scene title
+ *   body:   the email / situation text (supports \n)
+ *   choices: array of { label, deltas:{velocity,risk,relation}, coach }
+ */
+const SCENARIOS = [
+{
+  id: "acme-corp",
+  icon: "\uD83D\uDCBC",
+  difficulty: "Beginner",
+  title: "Closing Acme Corp — $25K ARR",
+  subtitle: "Mid-market new business. Procurement has entered the chat.",
+  topics: ["Paper precedence", "Liability caps", "Auto-renewal", "IP / feedback", "Data residency", "T-for-C"],
+  intro:
+    "You're Jordan, an AE at CloudForge (a fictional SaaS analytics platform provider).\n" +
+    "Acme Corp — a mid-market retailer — is ready to buy. Procurement just entered the chat.\n" +
+    "Your goal: close the deal with management and legal approvals.\n\n" +
+    "Reminder: CloudForge has standard templates for MSA, DPA, Security Addendum, and Order Form. Ask early what the customer needs — it saves weeks.",
+  steps: [
+    {
+      tag: "Step 1 — Paper Precedence",
+      title: "Whose template do we use?",
+      body:
+        "From: priya.s@acme.example\n" +
+        "Subject: Contracting — next steps\n\n" +
+        "Hi Jordan — great demo yesterday. To move quickly, please use the attached Acme Master Services Agreement as the starting point. It's what we use with all vendors.\n\n" +
+        "— Priya, Procurement",
+      choices: [
+        {
+          label: "\"Sure, happy to work from your MSA to keep things moving.\"",
+          deltas: { velocity: -3, risk: +25, relation: +3 },
+          coach:
+            "Whose paper you start from often decides 70% of the final contract. " +
+            "Customer templates usually bake in unlimited liability, broad indemnities, and audit rights your legal team and management will always push back on. " +
+            "Agreeing here may seem to improve velocity, but the intensive negotiations that follow will delay the process."
+        },
+        {
+          label: "\"Our legal team prefers we start from our MSA, crafted specifically for our SaaS products. I'll send it now — it's short and fair.\"",
+          deltas: { velocity: +8, risk: -15, relation: -2 },
+          coach:
+            "Correct move. Politely persuading the customer to use your paper is standard professional practice, not rudeness. " +
+            "A confident, friendly redirect protects and improves deal velocity and the relationship."
+        },
+        {
+          label: "Forward the email to legal without replying and wait.",
+          deltas: { velocity: -12, risk: -5, relation: -5 },
+          coach:
+            "Escalation has its place, but not for a routine paper-precedence question you're trained to handle. " +
+            "Open up the customer's MSA and fill in as much commercial detail as possible. Give the legal team as much information as possible so they can do the review efficiently. " +
+            "The deal will stall if there is a prolonged internal back-and-forth over basic information."
+        }
+      ]
+    },
+    {
+      tag: "Step 2 — Liability Cap",
+      title: "The uncapped liability redline",
+      body:
+        "Acme's counsel redlines section 12:\n\n" +
+        "\"Notwithstanding anything to the contrary, Provider's liability shall be UNLIMITED for (i) data breaches, (ii) breaches of confidentiality, and (iii) any third-party IP infringement claims.\"\n\n" +
+        "Priya: \"Our legal says this is standard — can you accept so we can get to signature this week?\"",
+      choices: [
+        {
+          label: "\"Yup, no problem for us to accept.\"",
+          deltas: { velocity: +10, risk: +35, relation: +5 },
+          coach:
+            "This is the single most expensive mistake an AE can make. " +
+            "For this type of clause, you should always seek management and legal approval before committing. " +
+            "Uncapped liability on data breach alone can bankrupt a SaaS company on a $25K deal. There is nothing 'standard' about unlimited liability — customers say that because it works."
+        },
+        {
+          label: "\"We can't do unlimited, but we'll offer a super-cap of 2x fees for those carve-outs. Let me loop in legal to finalize.\"",
+          deltas: { velocity: -2, risk: -20, relation: 0 },
+          coach:
+            "Textbook move. A 'super-cap' (e.g. 2x–3x of the normal cap) for sensitive carve-outs is the industry compromise. " +
+            "You're showing you are a seasoned AE in the SaaS industry."
+        },
+        {
+          label: "\"Let me check internally.\" (But do nothing, move on to other prospects, and hope the request goes away.)",
+          deltas: { velocity: -10, risk: +5, relation: -8 },
+          coach:
+            "Stalling on a liability redline reads as either incompetence or bad faith. " +
+            "Your legal team is well equipped to understand the risks and negotiate a mutually agreed arrangement. " +
+            "Simply loop them in and let them communicate directly with the customer's counsel. Silence doesn't remove the risk — it just delays it and erodes trust."
+        }
+      ]
+    },
+    {
+      tag: "Step 3 — Auto-Renewal",
+      title: "Strike the auto-renewal?",
+      body:
+        "Priya: \"Our policy is no auto-renewal clauses. Can we strike section 3.2 and require a fresh signature each year?\"",
+      choices: [
+        {
+          label: "\"No problem, we'll strike it.\"",
+          deltas: { velocity: +6, risk: 0, relation: +6 },
+          coach:
+            "Not wrong — this depends on your company policy. But you gave up commercial value for free. Auto-renewal isn't a legal risk issue; it's a revenue retention mechanic. " +
+            "It helps both parties to have a predictable price and continued use of the product. Your company should have standard wording for breaking the renewal cycle or capping price increases — that wording can help convince the customer to keep the auto-renewal arrangement."
+        },
+        {
+          label: "\"How about auto-renew with a 60-day opt-out notice window? You stay in control, we keep planning visibility.\"",
+          deltas: { velocity: +2, risk: 0, relation: +2 },
+          coach:
+            "Best answer. The 60-day notice window is the standard middle ground: the customer is never 'stuck', but the default preserves renewal flow. " +
+            "Knowing the difference between a legal issue and a commercial issue is half the job."
+        },
+        {
+          label: "\"Auto-renewal is non-negotiable in our paper.\"",
+          deltas: { velocity: -8, risk: 0, relation: -10 },
+          coach:
+            "Very few clauses are truly non-negotiable, and auto-renewal isn't one of them. Dying on this will cost you more than it protects."
+        }
+      ]
+    },
+    {
+      tag: "Step 4 — IP & Feedback",
+      title: "Who owns the feedback?",
+      body:
+        "A late redline appears in section 9:\n\n" +
+        "\"Any feedback, suggestions, or improvement ideas provided by Customer shall remain the exclusive property of Customer, and Provider shall not incorporate them into the Service without a separate written license.\"",
+      choices: [
+        {
+          label: "Seems good — it's only feedback, how bad can it be?",
+          deltas: { velocity: +5, risk: +20, relation: +2 },
+          coach:
+            "Very bad. If you build a feature inspired by any customer conversation, you've just created an IP claim against your own roadmap. " +
+            "Multiply by every enterprise customer who copies this clause — product development becomes a minefield. Loop in the legal team for them to handle this."
+        },
+        {
+          label: "Counter: \"Feedback is provided on a non-confidential, royalty-free basis and may be freely used by Provider.\"",
+          deltas: { velocity: -2, risk: -5, relation: 0 },
+          coach:
+            "The norm in the SaaS industry is that the supplier owns any feedback, suggestions, or improvement ideas in order to further enhance the products. " +
+            "However, this is a complicated intellectual property concept that needs to be resolved by the legal team. Handling IP redlines yourself creates risk even when you think you know the answer."
+        },
+        {
+          label: "Escalate to legal immediately.",
+          deltas: { velocity: -3, risk: -15, relation: 0 },
+          coach:
+            "Correct answer. IP ownership is exactly the kind of clause that belongs on legal's desk. " +
+            "You could reference similar language from past deals, but there is no way to ensure the correctness of your interpretation. Part of AE maturity is recognizing which clauses to escalate — and this is one of them."
+        }
+      ]
+    },
+    {
+      tag: "Step 5 — Data Residency & Subprocessors",
+      title: "The security addendum ask",
+      body:
+        "Acme's InfoSec: \"All customer data must remain in the EU. We also need to pre-approve every subprocessor.\"",
+      choices: [
+        {
+          label: "\"Yes, should be fine. We have AWS instances in the EU.\"",
+          deltas: { velocity: +10, risk: +30, relation: +5 },
+          coach:
+            "You just promised something you almost certainly can't deliver. Data residency is only part of the picture. " +
+            "Committing to pre-approval for all subprocessors may cause bigger problems if CloudForge ever wants to change infrastructure providers — you would need approval from every customer with a similar provision, making operations unworkable. " +
+            "There may also be other risky terms buried in the security addendum."
+        },
+        {
+          label: "\"Let me check with our security team on what we can actually commit to, and come back with our DPA and subprocessor list.\"",
+          deltas: { velocity: -4, risk: -10, relation: 0 },
+          coach:
+            "Data residency and subprocessors are technical commitments, not commercial ones. They often come with penalties for breach, which will be handled by the legal team. " +
+            "You don't make promises about infrastructure you don't control. Bring the addendum and let legal and the security team work on it together."
+        },
+        {
+          label: "\"Please find our Data Processing Addendum — it covers data residency, subprocessors, and breach notification in one document.\"",
+          deltas: { velocity: +5, risk: -15, relation: +5 },
+          coach:
+            "Same as with the standard MSA, your legal team likely has a data processing agreement template. " +
+            "By proposing this template — even at a later stage — it still moves the deal faster than a joint review starting from the customer's paper. Set the table, then hand it to legal."
+        }
+      ]
+    },
+    {
+      tag: "Step 6 — Signing Day",
+      title: "\"One last thing...\"",
+      body:
+        "Acme's CFO, on the closing call: \"Jordan, I love the product. Before I sign — can we get a 30-day termination-for-convenience clause? Just as a safety net. It won't be used.\"",
+      choices: [
+        {
+          label: "\"Done. 30-day termination for convenience, we'll get it into the final draft.\"",
+          deltas: { velocity: +12, risk: +25, relation: +8 },
+          coach:
+            "It's never 'just a safety net.' Termination for convenience turns an annual contract into a month-to-month deal, destroys forecast accuracy, and invalidates any multi-year discount you gave. " +
+            "Finance will have opinions, and it may affect your commission calculation."
+        },
+        {
+          label: "\"We don't offer termination for convenience on annual deals — it protects our continuous investment in improving the products and services for our customers. However, we can agree to termination for breach. Our commitment to service quality is backed by our uptime SLA with service credits — that's your real safety net.\"",
+          deltas: { velocity: +2, risk: -5, relation: +2 },
+          coach:
+            "Beautiful pivot. You reframed a legal concession as a commercial reassurance. " +
+            "SLA credits are bounded, pre-agreed, and give the customer what they actually want: confidence that the service will work."
+        },
+        {
+          label: "\"Let me escalate to legal and get back to you tomorrow.\"",
+          deltas: { velocity: -5, risk: 0, relation: -4 },
+          coach:
+            "Termination for convenience is a commercial point, and management will have standard guidelines on this. It is very unlikely that management will approve such an arrangement. " +
+            "On the signing call, 'let me get back to you' is the sound of a deal slipping a week. Handle it in the room."
+        }
+      ]
+    }
+  ]
+},
+{
+  id: "startup-sweetheart",
+  icon: "\uD83D\uDE80",
+  difficulty: "Beginner",
+  title: "Startup Sweetheart — NovaBuild, $95K ARR",
+  subtitle: "Enthusiastic founder, no legal team, everything must happen yesterday.",
+  topics: ["Signature authority", "Verbal side-deals", "Trial conversion", "DPA basics", "Founder sales"],
+  intro:
+    "You're Jordan, AE at CloudForge. Ava Chen, founder/CEO of NovaBuild (Series B, ~85 employees), loves your product and wants to go live Monday.\n" +
+    "She has no in-house legal team and treats contracts as speed bumps. The deal is $95K ARR — meaningful but not strategic.\n" +
+    "Your job: bring the contract home without letting enthusiasm become future regret.",
+  steps: [
+    {
+      tag: "Step 1 — The Handshake Close",
+      title: "\"Just send it, I'll sign tonight.\"",
+      body:
+        "Ava, on a call: \"Jordan, we love it. I'll sign whatever — just email me the contract and I'll DocuSign it tonight. We want to go live Monday. Trust me, I don't need to read 40 pages of legalese.\"",
+      choices: [
+        {
+          label: "\"Amazing! Sending now — signature on page 12, you're live Monday.\"",
+          deltas: { velocity: +12, risk: +15, relation: +5 },
+          coach:
+            "Enthusiasm is a gift, but \"I'll sign whatever\" is not informed consent. Six months from now, when Ava learns about the auto-renewal or the liability cap she \"never agreed to,\" the relationship takes the hit. A brief walkthrough protects both sides."
+        },
+        {
+          label: "\"Love the energy. Let's do a 15-min walkthrough tomorrow — then sign, then live by Wednesday.\"",
+          deltas: { velocity: -3, risk: -10, relation: +3 },
+          coach:
+            "Textbook. Founders who skip legal review today become founders who claim they \"never agreed to that\" in twelve months. A short, friendly walkthrough creates shared understanding, protects both parties, and barely delays the deal."
+        },
+        {
+          label: "\"We need your legal team to review first. Can you engage outside counsel?\"",
+          deltas: { velocity: -10, risk: -5, relation: -8 },
+          coach:
+            "Overkill for a $95K startup deal. Demanding outside counsel when the founder is ready to sign creates unnecessary friction and implies distrust. A walkthrough from you is sufficient — save formal legal review for deals where the stakes (or the terms) actually warrant it."
+        }
+      ]
+    },
+    {
+      tag: "Step 2 — The Verbal Side Deal",
+      title: "\"Your SE promised us the analytics module for free.\"",
+      body:
+        "From: ava@novabuild.example\n" +
+        "Subject: Quick confirmation\n\n" +
+        "Hi Jordan — before we sign, can you just confirm over email that we'll get the enterprise analytics module at no extra cost when it launches? That's what your SE promised in the demo. Thanks!\n\n" +
+        "— Ava",
+      choices: [
+        {
+          label: "\"Absolutely — putting it in writing for you now.\"",
+          deltas: { velocity: +8, risk: +25, relation: +8 },
+          coach:
+            "Never commit to delivering an unbuilt feature at no cost via email. You don't know what your SE actually said (demo enthusiasm vs. firm commitment), you don't know the launch price or timing, and you've just created a side agreement that lives outside the contract. Side letters are how AEs accidentally sink their own forecast."
+        },
+        {
+          label: "\"Let me sync with my SE on exactly what was discussed, and we'll reflect any commitments in the Order Form.\"",
+          deltas: { velocity: -2, risk: -10, relation: +2 },
+          coach:
+            "Perfect process. Verify what was actually promised (often \"we're working on it\" gets remembered as \"you'll get it free\"), then centralize any real commitments in the Order Form. One source of truth, no side letters, no \"but Jordan emailed me...\" at renewal."
+        },
+        {
+          label: "\"We don't make feature commitments outside the contract.\"",
+          deltas: { velocity: -6, risk: 0, relation: -10 },
+          coach:
+            "Correct policy, cold delivery. Ava feels like she's suddenly being legaled by someone who was just her best friend five minutes ago. The right answer is to acknowledge the conversation, verify the facts, and document properly — not to shut her down."
+        }
+      ]
+    },
+    {
+      tag: "Step 3 — The Trial That Never Ends",
+      title: "Six weeks into a two-week trial",
+      body:
+        "NovaBuild started a \"2-week trial\" six weeks ago. They now have 40 active users uploading real production data daily.\n\n" +
+        "Ava: \"Can we extend the trial one more month? We're still evaluating.\"",
+      choices: [
+        {
+          label: "\"Of course! Take all the time you need.\"",
+          deltas: { velocity: +5, risk: +25, relation: +5 },
+          coach:
+            "They're not evaluating — they're running production on your platform for free, with no contract, no DPA, and no liability framework. If anything goes wrong during the extended trial, you have zero contractual protection. \"Extending\" is how trials become indefinite freeloads."
+        },
+        {
+          label: "\"You're clearly getting value — 40 users is well past trial scale. Let's convert this week; I'll credit the trial period toward your first invoice.\"",
+          deltas: { velocity: +3, risk: -10, relation: +3 },
+          coach:
+            "Beautifully done. You named reality (this isn't a trial anymore) while offering a commercial sweetener (trial credit). You also bring the data and the users under a proper contract — which the customer needs, even if they don't know it yet."
+        },
+        {
+          label: "\"Trial ends Friday. I'll need to shut off access if no contract is signed.\"",
+          deltas: { velocity: -5, risk: -5, relation: -12 },
+          coach:
+            "You're right that the trial should end — but threatening to cut off production access is how you make enemies. The same outcome (contract signed) is available without the threat. Leverage is more effective when it's implied, not announced."
+        }
+      ]
+    },
+    {
+      tag: "Step 4 — The Missing DPA",
+      title: "Uh oh. That's customer PII.",
+      body:
+        "Reviewing the trial data, you notice NovaBuild has been uploading customer personal information — names, emails, purchase histories — for the past six weeks.\n\n" +
+        "There is no Data Processing Agreement in place. The MSA has a generic confidentiality clause, nothing more.",
+      choices: [
+        {
+          label: "Ignore it — the MSA's confidentiality clause covers data handling well enough.",
+          deltas: { velocity: +5, risk: +30, relation: 0 },
+          coach:
+            "A generic confidentiality clause is not a DPA. If NovaBuild's end customers are in the EU, California, or several other jurisdictions, you are both potentially violating data protection law right now. Ignoring a missing DPA on live PII processing is the kind of thing that shows up in a regulator's letter."
+        },
+        {
+          label: "\"Ava — quick heads up: I noticed you're processing customer PII on our platform. We need a DPA signed alongside the MSA. I'll send both together.\"",
+          deltas: { velocity: -2, risk: -15, relation: +4 },
+          coach:
+            "Correct and professional. Ava probably didn't know she needed a DPA — you just educated your customer while protecting both companies. Proactive compliance flags like this build enormous trust, especially with founders who later raise a Series C and suddenly face enterprise due diligence."
+        },
+        {
+          label: "\"We need to pause your account until a DPA is signed. Sorry, compliance.\"",
+          deltas: { velocity: -10, risk: -10, relation: -10 },
+          coach:
+            "Legally cautious, commercially nuclear. You can get a DPA signed in 48 hours alongside the MSA — there's no need to freeze a customer's production environment while you do it. Pausing access turns a manageable compliance issue into a relationship crisis."
+        }
+      ]
+    },
+    {
+      tag: "Step 5 — Who's Actually Signing?",
+      title: "Who is Marcus Rivera?",
+      body:
+        "Ava sends back the countersigned contract. It's signed by \"Marcus Rivera, Head of Operations\" — someone you've never spoken to.\n\n" +
+        "Ava: \"Yep, Marcus handles all our vendor paperwork. We're good to go live?\"",
+      choices: [
+        {
+          label: "Countersign and book the deal. If Ava says Marcus is the guy, Marcus is the guy.",
+          deltas: { velocity: +10, risk: +20, relation: +2 },
+          coach:
+            "Signature authority is a surprisingly common trap. At a Series B startup, contracts of this size usually require CEO or board-delegated authority. If Marcus doesn't actually have authority to bind the company, the whole agreement could be voidable — a problem no one notices until renewal goes sideways or the company gets acquired."
+        },
+        {
+          label: "\"Quick check: can Ava countersign as CEO, or can you send me a one-liner from Ava confirming Marcus is authorized for contracts of this size?\"",
+          deltas: { velocity: -3, risk: -12, relation: 0 },
+          coach:
+            "Right instinct, light touch. You're not questioning Ava's judgment — you're protecting the enforceability of the contract. A 30-second email from Ava solves it, and it makes the contract actually defensible if anyone ever challenges Marcus's authority."
+        },
+        {
+          label: "\"We need a formal board resolution confirming Marcus's signature authority.\"",
+          deltas: { velocity: -10, risk: -5, relation: -8 },
+          coach:
+            "Way too heavy for a $95K startup deal. Board resolutions are for Fortune 500 procurement, not Series B founder-led deals. A quick CEO confirmation is more than sufficient — asking for a board resolution signals you don't understand startup realities."
+        }
+      ]
+    }
+  ]
+}
+];
+
+/* --------------------------- engine --------------------------------- */
+
+const state = {
+  screen: "home",       // "home" | "playing" | "result"
+  scenarioId: null,
+  stepIndex: 0,
+  meters: { ...Object.fromEntries(Object.entries(METERS).map(([k,v]) => [k, v.start])) },
+  finished: false,
+  awaitingNext: false,
+  lastCoach: null,
+  introShown: false,
+};
+
+const $header = document.getElementById("appHeader");
+const $meters = document.getElementById("meters");
+const $stage  = document.getElementById("stage");
+
+function clamp(n) { return Math.max(0, Math.min(100, n)); }
+function currentScenario() { return SCENARIOS.find(s => s.id === state.scenarioId); }
+
+/* ---- localStorage: best score per scenario ---- */
+function getBestScore(id) {
+  try {
+    const raw = localStorage.getItem(`closethedeal_${id}_best`);
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
+function saveBestScore(id, score, letter) {
+  try {
+    const cur = getBestScore(id);
+    if (!cur || score > cur.score) {
+      localStorage.setItem(`closethedeal_${id}_best`, JSON.stringify({ score, letter }));
+    }
+  } catch { /* private browsing — skip silently */ }
+}
+function gradeColor(letter) {
+  if (letter === "A") return "var(--good)";
+  if (letter === "B") return "var(--accent)";
+  if (letter === "C") return "var(--warn)";
+  return "var(--bad)";
+}
+
+function renderMeters() {
+  $meters.innerHTML = Object.entries(METERS).map(([key, def]) => {
+    const val = clamp(state.meters[key]);
+    const barClass = key === "relation" ? "relation" : key;
+    return `
+      <div class="meter">
+        <div class="label"><span>${def.label}</span><span class="value">${val}</span></div>
+        <div class="bar ${barClass}"><span style="width:${val}%"></span></div>
+      </div>`;
+  }).join("");
+}
+
+function renderStep() {
+  if (state.finished) return renderEnd();
+  const scenario = currentScenario();
+
+  $meters.style.display = "";
+  $header.innerHTML = `
+    <h1>Close the Deal</h1>
+    <p>${scenario.title}</p>`;
+  renderMeters();
+
+  if (state.stepIndex === 0 && !state.introShown) {
+    // Intro card
+    $stage.innerHTML = `
+      <div class="card">
+        <span class="tag">Scenario</span>
+        <h2 class="scene-title">${scenario.title}</h2>
+        <div class="scene-body">${scenario.intro.replace(/\n/g,"<br/>")}</div>
+        <div class="controls">
+          <button class="ghost" id="backHomeBtn">← Back to scenarios</button>
+          <button class="primary" id="startBtn">Start the deal →</button>
+        </div>
+      </div>`;
+    document.getElementById("startBtn").onclick = () => {
+      state.introShown = true;
+      renderStep();
+    };
+    document.getElementById("backHomeBtn").onclick = goHome;
+    return;
+  }
+
+  const step = scenario.steps[state.stepIndex];
+  $stage.innerHTML = `
+    <div class="card">
+      <span class="tag">${step.tag}</span>
+      <h2 class="scene-title">${step.title}</h2>
+      <div class="scene-body">${step.body.replace(/\n/g,"<br/>")}</div>
+      <div class="choices" id="choices"></div>
+      <div id="coachSlot"></div>
+      <div class="controls" id="controls"></div>
+    </div>`;
+
+  const $choices = document.getElementById("choices");
+  step.choices.forEach((c, i) => {
+    const btn = document.createElement("button");
+    btn.className = "choice";
+    btn.textContent = c.label;
+    btn.onclick = () => pickChoice(i);
+    $choices.appendChild(btn);
+  });
+}
+
+function pickChoice(i) {
+  const step = currentScenario().steps[state.stepIndex];
+  const choice = step.choices[i];
+
+  // apply deltas (risk increases are "bad", so higher = worse)
+  for (const [k, v] of Object.entries(choice.deltas)) {
+    state.meters[k] = clamp(state.meters[k] + v);
+  }
+  renderMeters();
+
+  // disable choice buttons
+  document.querySelectorAll(".choice").forEach(b => {
+    b.disabled = true;
+    b.style.opacity = 0.55;
+    b.style.cursor = "default";
+  });
+  // highlight chosen
+  document.querySelectorAll(".choice")[i].style.borderColor = "var(--accent)";
+  document.querySelectorAll(".choice")[i].style.opacity = 1;
+
+  // show coach
+  const deltasHtml = Object.entries(choice.deltas).map(([k,v]) => {
+    if (v === 0) return `<span class="delta neu">${METERS[k].label}: 0</span>`;
+    // Risk: positive delta = bad. Others: positive = good.
+    const isGood = (k === "risk") ? (v < 0) : (v > 0);
+    const cls = isGood ? "pos" : "neg";
+    const sign = v > 0 ? "+" : "";
+    return `<span class="delta ${cls}">${METERS[k].label}: ${sign}${v}</span>`;
+  }).join("");
+
+  document.getElementById("coachSlot").innerHTML = `
+    <div class="coach">
+      <h4>Legal Coach</h4>
+      <div>${choice.coach}</div>
+      <div class="deltas">${deltasHtml}</div>
+    </div>`;
+
+  const nextLabel = state.stepIndex === currentScenario().steps.length - 1 ? "See your result →" : "Next step →";
+  document.getElementById("controls").innerHTML =
+    `<span></span><button class="primary" id="nextBtn">${nextLabel}</button>`;
+  document.getElementById("nextBtn").onclick = advance;
+}
+
+function advance() {
+  if (state.stepIndex >= currentScenario().steps.length - 1) {
+    state.finished = true;
+    state.screen = "result";
+    renderEnd();
+    return;
+  }
+  state.stepIndex += 1;
+  state.lastCoach = null;
+  renderStep();
+}
+
+function grade() {
+  // Lower risk is better. Combine into a 0-100 composite.
+  const { velocity, risk, relation } = state.meters;
+  const score = Math.round((velocity * 0.25) + ((100 - risk) * 0.55) + (relation * 0.20));
+  let letter, headline, body;
+  if (score >= 85) {
+    letter = "A";
+    headline = "Deal closed. Legal bought you coffee.";
+    body = "You protected the company's risk posture without losing the relationship. This is what 'commercially sharp + legally aware' looks like.";
+  } else if (score >= 70) {
+    letter = "B";
+    headline = "Deal closed with minor redlines outstanding.";
+    body = "Solid AE work. A couple of concessions will show up at renewal, but nothing that'll wake anyone up at 3am.";
+  } else if (score >= 55) {
+    letter = "C";
+    headline = "Deal closed — but legal flagged issues for next cycle.";
+    body = "You got the signature. You also accepted commitments your team will have to live with. Worth a debrief with your SE and legal partner.";
+  } else if (score >= 40) {
+    letter = "D";
+    headline = "Deal closed. Six months later, regrets.";
+    body = "Uncapped exposure, unclear data residency, or an IP trap you didn't see. Revenue now, invoice from counsel later.";
+  } else {
+    letter = "F";
+    headline = "Deal closed. Bankruptcy-adjacent.";
+    body = "Somewhere in this contract is the clause that will someday be quoted in a deposition. Please replay.";
+  }
+  return { score, letter, headline, body };
+}
+
+function renderEnd() {
+  const g = grade();
+  const scenario = currentScenario();
+  saveBestScore(scenario.id, g.score, g.letter);
+
+  $meters.style.display = "";
+  $header.innerHTML = `
+    <h1>Close the Deal</h1>
+    <p>${scenario.title}</p>`;
+  renderMeters();
+
+  $stage.innerHTML = `
+    <div class="card">
+      <span class="tag">Result</span>
+      <div class="grade">
+        <div class="big" style="background: linear-gradient(90deg, ${gradeColor(g.letter)}, #a78bfa); -webkit-background-clip: text; background-clip: text; color: transparent;">${g.letter}</div>
+        <div class="sub">Composite score: ${g.score} / 100</div>
+      </div>
+      <h2 class="scene-title" style="text-align:center; margin-top:14px">${g.headline}</h2>
+      <div class="scene-body" style="text-align:center">${g.body}</div>
+      <div class="controls">
+        <button class="ghost" id="backHomeBtn">← Back to scenarios</button>
+        <button class="primary" id="replayBtn">↺ Replay scenario</button>
+      </div>
+    </div>`;
+  document.getElementById("replayBtn").onclick = () => startScenario(scenario.id);
+  document.getElementById("backHomeBtn").onclick = goHome;
+}
+
+/* --------------------------- navigation ----------------------------- */
+
+function startScenario(id) {
+  state.screen = "playing";
+  state.scenarioId = id;
+  state.stepIndex = 0;
+  state.finished = false;
+  state.awaitingNext = false;
+  state.lastCoach = null;
+  state.introShown = false;
+  state.meters = Object.fromEntries(Object.entries(METERS).map(([k,v]) => [k, v.start]));
+  render();
+}
+
+function goHome() {
+  state.screen = "home";
+  state.scenarioId = null;
+  state.finished = false;
+  render();
+}
+
+function render() {
+  if (state.screen === "home") return renderHome();
+  if (state.screen === "result") return renderEnd();
+  return renderStep();
+}
+
+function renderHome() {
+  $meters.style.display = "none";
+  $header.innerHTML = `
+    <h1>Close the Deal</h1>
+    <p>A legal literacy game for SaaS account executives. Pick a scenario. Test your contract instincts. No lawyers harmed.</p>`;
+
+  // Progress summary
+  const played = SCENARIOS.filter(s => getBestScore(s.id)).length;
+  const total = SCENARIOS.length;
+  const bestGrade = SCENARIOS
+    .map(s => getBestScore(s.id))
+    .filter(Boolean)
+    .sort((a, b) => b.score - a.score)[0];
+  const summaryHtml = `
+    <div class="progress-summary">
+      <div class="stat"><b>${played}</b> / ${total} scenarios played</div>
+      ${bestGrade ? `<div class="stat">Personal best: <b style="color:${gradeColor(bestGrade.letter)}">${bestGrade.letter}</b> (${bestGrade.score})</div>` : ""}
+    </div>`;
+
+  const cardsHtml = SCENARIOS.map(s => {
+    const best = getBestScore(s.id);
+    const bestHtml = best
+      ? `Best: <span class="grade-badge" style="color:${gradeColor(best.letter)}">${best.letter}</span> (${best.score})`
+      : `Not played yet`;
+    const topicsHtml = s.topics.map(t => `<span class="sc-topic">${t}</span>`).join("");
+    const diffClass = s.difficulty.toLowerCase();
+    return `
+      <div class="scenario-card" data-id="${s.id}">
+        <div class="sc-header">
+          <span class="sc-icon">${s.icon}</span>
+          <span class="sc-difficulty ${diffClass}">${s.difficulty}</span>
+        </div>
+        <h3 class="sc-title">${s.title}</h3>
+        <p class="sc-subtitle">${s.subtitle}</p>
+        <div class="sc-topics">${topicsHtml}</div>
+        <div class="sc-footer">
+          <div>
+            <div class="sc-best">${bestHtml}</div>
+            <div class="sc-steps">${s.steps.length} decisions</div>
+          </div>
+          <span class="sc-play">Play →</span>
+        </div>
+      </div>`;
+  }).join("");
+
+  $stage.innerHTML = `${summaryHtml}<div class="home-grid">${cardsHtml}</div>`;
+
+  document.querySelectorAll(".scenario-card").forEach(card => {
+    card.onclick = () => startScenario(card.dataset.id);
+  });
+}
+
+/* --------------------------- boot ----------------------------------- */
+render();
+</script>
+</body>
+</html>
