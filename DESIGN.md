@@ -8,87 +8,69 @@ You are a **Traveler** seeking passage through the desert. At each oasis, you en
 
 ---
 
-## MVP Scope (Phase 1–5)
+## The Three Pillars of Passage
 
-### What we build:
-- **1 Oasis** (minimal desert background: sand, palm trees, water, archway)
-- **1 Guardian**: The Sphinx (wise, ancient, unimpressed, tests your worth)
-- **Visual layer**: Simple 2D (CSS/SVG silhouette Sphinx, minimal oasis, no complex animation yet)
-- **Interaction**: Approach Sphinx → she poses a riddle/question → you choose your answer → she responds with wisdom → you unlock sacred scrolls
-- **Sacred Scrolls**: Contract templates, negotiation wisdom, clause playbooks (earned by wise choices)
-- **Respect System**: The Sphinx's respect meter (trust/caution/speed) — always visible, evolves with your answers
-- **Passage Keys**: Unlock deeper understanding (treasures) that prepare you for the next oasis
+The Sphinx judges the Traveler on three dimensions — the *foundations of a sustainable partnership*:
 
-### What we defer (Phase 6+):
-- Multiple oases (different deal scenarios = different locations)
-- Complex UI animations / branching dialogue trees
-- 3D desert rendering (Three.js)
-- Voice/audio dialogue from the Sphinx
-- Inventory/quest log
+### 1. **Passage Key ⚡** (Speed of Credentialing)
+*How quickly can you deliver clean, approved legal terms?*
+
+- **What it measures**: Your ability to move confidently with proper preparation
+- **Not about rushing** — it's about being credible and decisive
+- **Low (0)**: "You move like a snail. Nothing is ready."
+- **Mid (50)**: "You balance speed with preparation."
+- **High (100)**: "You are credentialed. Your paperwork arrives clean."
+
+**When it increases**: Choosing answers that show confidence, readiness, decisiveness
+**When it decreases**: Choosing answers that show hesitation, delay, over-thinking
+
+### 2. **Ritual of Trust 🤝** (Reputation & Reliability)
+*Are you a reliable partner the Sphinx can count on?*
+
+- **What it measures**: Your trustworthiness as a professional and partner
+- **The Sphinx sees you as**: A "Reliable Partner" who won't send garbage paperwork
+- **Low (0)**: "You are careless. Procurement won't trust you."
+- **Mid (50)**: "You are competent. Procurement knows what to expect."
+- **High (100)**: "You are trusted. Procurement requests you by name."
+
+**When it increases**: Choosing answers that show respect, integrity, partnership mindset
+**When it decreases**: Choosing answers that show dismissal, disrespect, arrogance
+
+### 3. **Structural Integrity 🏛️** (Deal Durability)
+*Does your deal hold up under scrutiny, or does it have cracks in the foundation?*
+
+- **What it measures**: The soundness of your legal position (not just speed)
+- **The Sphinx asks**: "Will this deal survive a lawyer's review? An audit? A dispute?"
+- **Low (0)**: "Cracks everywhere. This deal will shatter."
+- **Mid (50)**: "Adequate foundation. It will hold."
+- **High (100)**: "Rock solid. Built to last."
+
+**When it increases**: Choosing answers that protect the company legally, handle risky clauses properly
+**When it decreases**: Choosing answers that skip legal safeguards, accept unlimited liability, ignore compliance
 
 ---
 
 ## Thematic Mapping
 
-| Corporate Frame | Gatekeeper Frame |
-|---|---|
-| AE | Traveler |
-| Customer/Procurement | The Sphinx (recurring guardian) |
-| Office | Desert oasis |
-| Close deal | Earn passage through archway; unlock the oasis |
-| Contract template | Sacred Scroll / Papyrus |
-| Legal tip | Wisdom Tablet |
-| Grade/Score | Merit level: Unworthy / Novice / Prepared / Worthy / Enlightened |
-| Meter: "Relationship" | Sphinx's Trust |
-| Meter: "Risk Aversion" | Sphinx's Respect for caution |
-| Meter: "Velocity" | Sphinx's appreciation for speed |
+| Old Corporate Frame | Gatekeeper Theme | Actual Meaning |
+|---|---|---|
+| Velocity | **Passage Key ⚡** | Speed of credentialing; decisiveness backed by preparation |
+| Relationship | **Ritual of Trust 🤝** | Reputation as a reliable, professional partner |
+| Risk | **Structural Integrity 🏛️** | Deal durability; avoiding cracks in the foundation |
 
 ---
 
 ## Data Schema (MVP)
 
 ```javascript
-// 1. World state (future: array of oases)
-world = {
-  currentOasis: "acme-oasis",
-  oases: {
-    "acme-oasis": {
-      id: "acme-oasis",
-      name: "Acme Corp Oasis",
-      guardianId: "the-sphinx",
-      backgroundImage: "assets/oasis-desert.svg",
-      // Palm trees, water, archway, sand dunes
-    },
-    "novabuild-oasis": {
-      id: "novabuild-oasis",
-      name: "NovaBuild Oasis",
-      guardianId: "the-sphinx",
-      backgroundImage: "assets/oasis-desert.svg",
-      // Same Sphinx, same oasis aesthetic, different riddles
-    }
-  }
+// The Three Pillars (replaces old faith/meters)
+pillars = {
+  passageKey: 70,          // ⚡ How credible & decisive are you?
+  ritualOfTrust: 70,       // 🤝 How much does Sphinx trust you?
+  structuralIntegrity: 20, // 🏛️ How sound is your legal position?
 };
 
-// 2. Guardian (singular, recurring character)
-guardians = {
-  "the-sphinx": {
-    id: "the-sphinx",
-    name: "The Sphinx",
-    title: "Keeper of the Oases, Tester of Travelers",
-    sprite: "assets/sphinx-silhouette.svg",
-    position: { x: 400, y: 300 },  // Fixed for MVP
-    currentDialogue: null,
-  }
-};
-
-// 3. Respect System (replaces generic faith)
-respect = {
-  trust: 70,           // 0–100, does Sphinx trust your judgment?
-  caution: 20,         // 0–100, does Sphinx respect your carefulness?
-  speed: 60,           // 0–100, does Sphinx appreciate your decisiveness?
-};
-
-// 4. Sacred Scrolls (contract templates, wisdom)
+// Sacred Scrolls (contract templates, wisdom)
 scrolls = {
   "cloudforge-standard-msa": {
     id: "cloudforge-standard-msa",
@@ -97,6 +79,7 @@ scrolls = {
     category: "sacred-scroll",
     description: "CloudForge's standard MSA — your foundation",
     startingScroll: true,
+    unlockIf: null,
   },
   "super-cap-wisdom": {
     id: "super-cap-wisdom",
@@ -104,21 +87,41 @@ scrolls = {
     icon: "💰",
     category: "wisdom-tablet",
     description: "Liability cap negotiation: 2x–3x super-caps",
-    unlockIf: (respect) => respect.caution > 40,
+    unlockIf: (pillars) => pillars.structuralIntegrity > 40,
   },
-  // ... more scrolls
+  "auto-renewal-scroll": {
+    id: "auto-renewal-scroll",
+    name: "Scroll of Balanced Renewal",
+    icon: "🔄",
+    category: "sacred-scroll",
+    description: "60-day opt-out compromise for auto-renewal",
+    unlockIf: (pillars) => pillars.ritualOfTrust > 60,
+  },
+  "dpa-essence": {
+    id: "dpa-essence",
+    name: "Essence of Data Guardianship",
+    icon: "🔐",
+    category: "wisdom-tablet",
+    description: "Data residency and DPA essentials",
+    unlockIf: (pillars) => pillars.structuralIntegrity > 50,
+  },
+  "closure-scroll": {
+    id: "closure-scroll",
+    name: "Scroll of Swift Closure",
+    icon: "⚡",
+    category: "wisdom-tablet",
+    description: "Close deals confidently without sacrificing terms",
+    unlockIf: (pillars) => pillars.passageKey > 60,
+  },
 };
 
-// 5. Scenarios (EXISTING, reframed as riddles)
-// SCENARIOS array stays the same; each step = a riddle the Sphinx poses
-
-// 6. Session state
+// Session state
 session = {
   oasisId: "acme-oasis",
   riddleIndex: 0,
   scrollsUnlocked: ["cloudforge-standard-msa"],
   passageGranted: false,
-  scoreComposite: 0,
+  merit: null,  // ENLIGHTENED / WORTHY / PREPARED / NOVICE / UNWORTHY
 };
 ```
 
@@ -130,25 +133,25 @@ session = {
 ┌──────────────────────────────────────────────┐
 │  Presentation Layer (render.js)              │
 │  - Desert oasis visuals (DOM, future Canvas) │
+│  - Three Pillars display (always visible)    │
 │  - Sphinx visuals (future animations)        │
-│  - Respect meter display                     │
 └──────────────────────┬───────────────────────┘
                        │
 ┌──────────────────────▼───────────────────────┐
 │  Game Logic (game.js)                        │
 │  - Riddle flow                               │
-│  - Respect deltas                            │
-│  - Scroll unlock logic                       │
-│  - Merit calculation                         │
+│  - Pillar deltas (passage key, trust, integrity) │
+│  - Scroll unlock logic (based on pillars)    │
+│  - Merit calculation (balance-aware)         │
 └──────────────────────┬───────────────────────┘
                        │
 ┌──────────────────────▼───────────────────────┐
 │  Data Layer (data/)                          │
 │  - scenarios.js (your riddles)               │
 │  - oases.js (world definition)               │
-│  - sphinx.js (guardian)                      │
+│  - sphinx.js (guardian definition)           │
 │  - scrolls.js (sacred texts)                 │
-│  - respect.js (alignment rules)              │
+│  - pillars.js (three pillar rules)           │
 └──────────────────────────────────────────────┘
 ```
 
@@ -159,22 +162,22 @@ session = {
 ```
 [Traveler's Path]
   ↓
-[Home: Choose an Oasis] 
+[Home: Choose an Oasis]
   "Acme Corp Oasis" / "NovaBuild Oasis"
   ↓
 [Desert Oasis Loads]
   - Minimal desert background
   - The Sphinx (SVG silhouette)
-  - Respect meter (always visible, top-right)
-    Sphinx's Trust: 70
-    Caution Respect: 20
-    Speed Respect: 60
+  - The Three Pillars (always visible, top-right)
+    ⚡ Passage Key: 70    [████░░]
+    🤝 Ritual of Trust: 70 [████░░]
+    🏛️ Structural Integrity: 20 [██░░░░]
   ↓
-[Traveler approaches Sphinx]
+[Traveler approaches]
   ↓
 [Sphinx poses riddle]
   "Greetings, Traveler. Here is my first test..."
-  [Question from scenario.steps[0]]
+  [Question from scenario]
   ↓
 [Traveler chooses answer]
   - Answer A
@@ -183,65 +186,77 @@ session = {
   ↓
 [Sphinx judges]
   "Ah, you chose [answer]. Here is why..."
+  [Coach text]
+  
   ✨ Unlocked: Sacred Scroll
-  📊 Respect updates
+  📊 Pillars shift:
+     ⚡ Passage Key: +8
+     🤝 Ritual of Trust: -15
+     🏛️ Structural Integrity: +5
   ↓
 [Next riddle or passage granted]
-  If more: Continue to next riddle
-  If done: "You have earned passage."
   ↓
 [Result: Merit & Scrolls]
   Merit: WORTHY
-  Scrolls Earned: 4/6
-  Respect Stats displayed
+  Scrolls: 4/6 unlocked
+  Three Pillars (final)
   [Replay] [Back to Oases]
 ```
 
 ---
 
-## The Sphinx's Personality
+## Merit Levels (Three Pillar Judgment)
 
-The Sphinx is:
-- Wise but not patronizing
-- Patient (she's tested a thousand travelers)
-- Clear about trade-offs
-- Fair and honest
-- Capable of dry humor
-
-Her tone never changes; her respect meter does.
-
----
-
-## Respect System (Always Visible)
-
-| Axis | Low (0) | Mid (50) | High (100) |
-|------|---------|----------|-----------|
-| **Trust** | Reckless | Balanced | Wise |
-| **Caution** | Gambler | Pragmatic | Protects what matters |
-| **Speed** | Too slow | Realistic | Closes when it counts |
-
----
-
-## Sacred Scrolls & Wisdom Tablets
-
-**Sacred Scrolls** = Core contract templates (MSAs, DPAs)
-**Wisdom Tablets** = Specific clause guidance, tactics
-
-Each represents knowledge the Traveler gains from the Sphinx's test.
-
----
-
-## Merit Levels (Replacing Grades)
+Merit is calculated based on **balance and overall performance**:
 
 ```javascript
 MERIT = {
-  ENLIGHTENED: "The Sphinx bows slightly. 'You walk the way of masters.'",
-  WORTHY: "The Sphinx nods. 'You have proven your judgment.'",
-  PREPARED: "The Sphinx is satisfied. 'You will learn. Return when you understand more.'",
-  NOVICE: "The Sphinx is patient. 'You have much to learn. Return when you are ready.'",
-  UNWORTHY: "The Sphinx does not step aside. 'You are not ready. Return when prepared.'",
+  ENLIGHTENED: {
+    title: "Enlightened",
+    description: "The Sphinx bows slightly. 'Swift, trustworthy, and sound. You walk the way of masters.'",
+    requirement: "All three pillars high (65+), excellent balance"
+  },
+  WORTHY: {
+    title: "Worthy",
+    description: "The Sphinx nods. 'You have proven your judgment. You may pass.'",
+    requirement: "At least two pillars solid (60+), no major weakness"
+  },
+  PREPARED: {
+    title: "Prepared",
+    description: "The Sphinx is satisfied. 'You will learn. Return when you understand more.'",
+    requirement: "Mixed performance; some strengths, some gaps"
+  },
+  NOVICE: {
+    title: "Novice",
+    description: "The Sphinx is patient. 'You have much to learn. Return when you are ready.'",
+    requirement: "One pillar decent, others weak"
+  },
+  UNWORTHY: {
+    title: "Unworthy",
+    description: "The Sphinx does not step aside. 'Study and return when you are ready.'",
+    requirement: "Major failure across pillars"
+  }
 };
 ```
+
+**The Sphinx's specific feedback**:
+- "You are fast but reckless" → High Passage Key, low Structural Integrity
+- "You are careful but too slow" → High Structural Integrity, low Passage Key
+- "You move people well but skip legal steps" → High Ritual of Trust, low Structural Integrity
+
+---
+
+## Sacred Scrolls by Pillar
+
+Scrolls unlock based on which pillar you demonstrate:
+
+| Scroll | Requires | Why |
+|--------|----------|-----|
+| Scrolls of CloudForge | Starting tool | Foundation |
+| Wisdom of the Super-Cap | Structural Integrity > 40 | Legal rigor required |
+| Scroll of Balanced Renewal | Ritual of Trust > 60 | Relationship skills required |
+| Essence of Data Guardianship | Structural Integrity > 50 | Compliance rigor required |
+| Scroll of Swift Closure | Passage Key > 60 | Decisiveness & credibility required |
 
 ---
 
@@ -250,56 +265,61 @@ MERIT = {
 ```
 index.html
 ├── js/
-│   ├── game.js         (riddle flow, respect, merit)
+│   ├── game.js         (riddle flow, three pillars, merit)
 │   ├── render.js       (oasis rendering; swappable)
-│   ├── data.js         (oases, sphinx, scrolls, respect)
+│   ├── data.js         (oases, sphinx, scrolls, pillars)
 │   └── scenarios.js    (YOUR EXISTING SCENARIOS)
 ├── assets/
 │   ├── oasis-desert.svg
 │   ├── sphinx-silhouette.svg
 │   └── ...
 ├── DESIGN.md
-└── THEME.md (optional: world-building, lore)
+└── THEME.md (optional: lore, pillar meanings)
 ```
 
 ---
 
 ## Phase Breakdown
 
-| Phase | Deliverable | Outcome |
-|-------|-------------|---------|
-| **1** | Riddle dialog UI | Sphinx asks, Traveler answers |
-| **2** | Oasis + Sphinx | Visual oasis appears |
-| **3** | Click-to-approach | Traveler can engage Sphinx |
-| **4** | Respect + scrolls | Traveler earns wisdom |
-| **5** | Polish | Sphinx feels alive |
-| **6+** | Extensions | More oases, animations, 3D |
+| Phase | Deliverable | What's New |
+|-------|-------------|-----------|
+| **1** | Riddle dialog UI | Sphinx asks, three pillars always visible top-right |
+| **2** | Oasis + Sphinx | Desert background + Sphinx silhouette |
+| **3** | Click-to-approach | Traveler engages Sphinx |
+| **4** | Pillars + scrolls | Three pillars drive scroll unlocks |
+| **5** | Polish | Sphinx feedback is specific to pillar imbalances |
+| **6+** | Extensions | Multiple oases, animations, 3D |
 
 ---
 
 ## Token Strategy
 
-- Phase 1–2 (Sonnet): ~2200 tokens
-- Phase 3–4 (Sonnet/Haiku): ~1700 tokens
-- Phase 5 (Haiku): ~400 tokens
+- **Phase 1** (Sonnet 4.6): ~1000 tokens
+- **Phase 2** (Sonnet 4.6): ~1200 tokens
+- **Phase 3** (Haiku 4.5): ~800 tokens
+- **Phase 4** (Sonnet 4.6): ~900 tokens
+- **Phase 5** (Haiku 4.5): ~400 tokens
 - **Total MVP: ~4.3K tokens**
 
 ---
 
 ## Design Principles
 
-1. **One wise mentor** — The Sphinx recurs across all scenarios
-2. **Test, not fight** — Riddles are challenges; skill and preparation matter
-3. **Professional, but mythic** — Legal training wrapped in timeless story
+1. **Three Pillars, not metrics** — Each pillar has real meaning in partnerships
+2. **Balance matters** — Sphinx respects well-rounded judgment
+3. **Professional & mythic** — Legal training in timeless story
 4. **Minimal aesthetics** — Desert, Sphinx, archway; no clutter
-5. **Data-driven, expandable** — JSON-driven; render layer swaps for future 3D
+5. **Data-driven, expandable** — Render layer swaps for future 3D
 6. **MVP mindset** — Multiple choice now; fancy animations later
 
 ---
 
 ## Next Steps
 
-✅ **Gatekeeper Theme Approved**
+✅ **Three Pillars Framework Ready**
 → **Phase 1**: Refactor quiz → Sphinx riddle dialogue (Sonnet 4.6, ~1000 tokens)
+   - Three pillars display (top-right, always visible)
+   - Sphinx asks riddles from your scenarios
+   - Each answer shifts the pillars
 
 Ready for Phase 1?
