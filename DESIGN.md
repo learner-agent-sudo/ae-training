@@ -1,79 +1,124 @@
-# Close the Deal — Game Redesign (MVP to 3D)
+# Close the Deal — The Gatekeeper of the Oasis
 
 ## Overview
-Transform the current quiz-based training into an **RPG-lite experience** where the AE (player character) enters a room, meets an NPC mentor, and answers legal/commercial questions to "unlock treasures" (tips, tools, progression). **MVP is simple** (1 room, 1 NPC), but architecture leaves room for 3D, multiple rooms/NPCs later.
+
+You are a **Traveler** seeking passage through the desert. At each oasis, you encounter **The Sphinx** — an ancient, wise guardian who holds the keys to closed deals. The Sphinx does not fight; she tests. By answering her questions with wisdom, preparation, and balance, you earn her respect and unlock the sacred scrolls and keys that grant you passage to the next oasis.
+
+**MVP**: One desert oasis, one Sphinx, multiple-choice wisdom trials. **Future**: Multiple oases, expanded scrolls/artifacts, animations, 3D desert landscapes.
 
 ---
 
 ## MVP Scope (Phase 1–5)
 
 ### What we build:
-- **1 room** (interior office/meeting space, fixed view)
-- **1 NPC** (Legal Coach, always present)
-- **Visual layer**: Simple 2D (CSS/SVG sprites, no complex animation)
-- **Interaction**: Click NPC → dialog box opens → multiple-choice answers → NPC responds with feedback
-- **Rewards**: Health/energy pickups, unlocked tips, progression bar
-- **Faith system**: AE's "alignment" (relationship/risk/velocity) shown as stats, evolves with choices
+- **1 Oasis** (minimal desert background: sand, palm trees, water, archway)
+- **1 Guardian**: The Sphinx (wise, ancient, unimpressed, tests your worth)
+- **Visual layer**: Simple 2D (CSS/SVG silhouette Sphinx, minimal oasis, no complex animation yet)
+- **Interaction**: Approach Sphinx → she poses a riddle/question → you choose your answer → she responds with wisdom → you unlock sacred scrolls
+- **Sacred Scrolls**: Contract templates, negotiation wisdom, clause playbooks (earned by wise choices)
+- **Respect System**: The Sphinx's respect meter (trust/caution/speed) — always visible, evolves with your answers
+- **Passage Keys**: Unlock deeper understanding (treasures) that prepare you for the next oasis
 
 ### What we defer (Phase 6+):
-- 3D graphics (Three.js)
-- Multiple rooms/navigation
-- Multiple NPCs
-- Complex animations
-- Inventory system
-- Quest log
+- Multiple oases (different deal scenarios = different locations)
+- Complex UI animations / branching dialogue trees
+- 3D desert rendering (Three.js)
+- Voice/audio dialogue from the Sphinx
+- Inventory/quest log
+
+---
+
+## Thematic Mapping
+
+| Corporate Frame | Gatekeeper Frame |
+|---|---|
+| AE | Traveler |
+| Customer/Procurement | The Sphinx (recurring guardian) |
+| Office | Desert oasis |
+| Close deal | Earn passage through archway; unlock the oasis |
+| Contract template | Sacred Scroll / Papyrus |
+| Legal tip | Wisdom Tablet |
+| Grade/Score | Merit level: Unworthy / Novice / Prepared / Worthy / Enlightened |
+| Meter: "Relationship" | Sphinx's Trust |
+| Meter: "Risk Aversion" | Sphinx's Respect for caution |
+| Meter: "Velocity" | Sphinx's appreciation for speed |
 
 ---
 
 ## Data Schema (MVP)
 
 ```javascript
-// 1. World state (future: array of rooms)
+// 1. World state (future: array of oases)
 world = {
-  currentRoom: "office",
-  rooms: {
-    office: {
-      id: "office",
-      npcId: "legal-coach",
-      backgroundImage: "assets/office.svg",
-      // Future: items: [...], exits: [...]
+  currentOasis: "acme-oasis",
+  oases: {
+    "acme-oasis": {
+      id: "acme-oasis",
+      name: "Acme Corp Oasis",
+      guardianId: "the-sphinx",
+      backgroundImage: "assets/oasis-desert.svg",
+      // Palm trees, water, archway, sand dunes
+    },
+    "novabuild-oasis": {
+      id: "novabuild-oasis",
+      name: "NovaBuild Oasis",
+      guardianId: "the-sphinx",
+      backgroundImage: "assets/oasis-desert.svg",
+      // Same Sphinx, same oasis aesthetic, different riddles
     }
   }
 };
 
-// 2. NPCs (future: array)
-npcs = {
-  "legal-coach": {
-    id: "legal-coach",
-    name: "Morgan",
-    sprite: "assets/npc-coach.svg",
+// 2. Guardian (singular, recurring character)
+guardians = {
+  "the-sphinx": {
+    id: "the-sphinx",
+    name: "The Sphinx",
+    title: "Keeper of the Oases, Tester of Travelers",
+    sprite: "assets/sphinx-silhouette.svg",
     position: { x: 400, y: 300 },  // Fixed for MVP
-    currentDialog: null,
-    // Future: personality, bias, relationship history
+    currentDialogue: null,
   }
 };
 
-// 3. AE's Faith (alignment system, replaces generic meters)
-faith = {
-  relationship: 70,    // 0–100, how much NPC likes AE
-  riskAversion: 20,    // 0–100, how cautious vs. bold AE is
-  velocity: 60,        // 0–100, how fast AE pushes deals
-  // These evolve as AE answers questions
+// 3. Respect System (replaces generic faith)
+respect = {
+  trust: 70,           // 0–100, does Sphinx trust your judgment?
+  caution: 20,         // 0–100, does Sphinx respect your carefulness?
+  speed: 60,           // 0–100, does Sphinx appreciate your decisiveness?
 };
 
-// 4. Scenarios (EXISTING, no change)
-// Use SCENARIOS array as-is; each scenario = one "conversation session" with NPC
-// NPC asks questions from scenario.steps[i].title
-// AE picks answers from scenario.steps[i].choices
-// NPC responds with coach text + rewards
+// 4. Sacred Scrolls (contract templates, wisdom)
+scrolls = {
+  "cloudforge-standard-msa": {
+    id: "cloudforge-standard-msa",
+    name: "Scrolls of CloudForge",
+    icon: "📜",
+    category: "sacred-scroll",
+    description: "CloudForge's standard MSA — your foundation",
+    startingScroll: true,
+  },
+  "super-cap-wisdom": {
+    id: "super-cap-wisdom",
+    name: "Wisdom of the Super-Cap",
+    icon: "💰",
+    category: "wisdom-tablet",
+    description: "Liability cap negotiation: 2x–3x super-caps",
+    unlockIf: (respect) => respect.caution > 40,
+  },
+  // ... more scrolls
+};
 
-// 5. Session state
+// 5. Scenarios (EXISTING, reframed as riddles)
+// SCENARIOS array stays the same; each step = a riddle the Sphinx poses
+
+// 6. Session state
 session = {
-  scenarioId: "acme-corp",
-  stepIndex: 0,
-  treasuresUnlocked: [],  // Array of { type, label, reward }
-  healthRecovered: 0,     // Total health pickups used
-  scoreComposite: 0,      // Final grade (same formula as before)
+  oasisId: "acme-oasis",
+  riddleIndex: 0,
+  scrollsUnlocked: ["cloudforge-standard-msa"],
+  passageGranted: false,
+  scoreComposite: 0,
 };
 ```
 
@@ -82,150 +127,120 @@ session = {
 ## Architecture Layers
 
 ```
-┌─────────────────────────────────────────┐
-│  UI Layer (render.js)                   │
-│  - DOM/Canvas rendering                 │
-│  - Event handlers (click NPC, pick answer)
-└─────────────────┬───────────────────────┘
-                  │
-┌─────────────────▼───────────────────────┐
-│  Game Logic (game.js)                   │
-│  - State transitions                    │
-│  - Faith deltas (+ Sonnet LLM later)    │
-│  - Treasure unlock logic                │
-└─────────────────┬───────────────────────┘
-                  │
-┌─────────────────▼───────────────────────┐
-│  Data Layer (data/)                     │
-│  - scenarios.js (YOUR EXISTING)         │
-│  - world.js (rooms, NPCs)               │
-│  - faith.js (alignment rules)           │
-└─────────────────────────────────────────┘
+┌──────────────────────────────────────────────┐
+│  Presentation Layer (render.js)              │
+│  - Desert oasis visuals (DOM, future Canvas) │
+│  - Sphinx visuals (future animations)        │
+│  - Respect meter display                     │
+└──────────────────────┬───────────────────────┘
+                       │
+┌──────────────────────▼───────────────────────┐
+│  Game Logic (game.js)                        │
+│  - Riddle flow                               │
+│  - Respect deltas                            │
+│  - Scroll unlock logic                       │
+│  - Merit calculation                         │
+└──────────────────────┬───────────────────────┘
+                       │
+┌──────────────────────▼───────────────────────┐
+│  Data Layer (data/)                          │
+│  - scenarios.js (your riddles)               │
+│  - oases.js (world definition)               │
+│  - sphinx.js (guardian)                      │
+│  - scrolls.js (sacred texts)                 │
+│  - respect.js (alignment rules)              │
+└──────────────────────────────────────────────┘
 ```
-
-**Why this matters for 3D**: The *render.js* is swappable. Today: DOM/CSS. Tomorrow: Canvas/Three.js. Everything else stays.
 
 ---
 
 ## User Flow (MVP)
 
 ```
-[Home Screen]
+[Traveler's Path]
   ↓
-[Pick Scenario] → "Closing Acme Corp — $25K ARR"
+[Home: Choose an Oasis] 
+  "Acme Corp Oasis" / "NovaBuild Oasis"
   ↓
-[Room renders] → NPC visible, waiting
-  Player sees: Room background + NPC sprite + "Talk to Morgan" button
+[Desert Oasis Loads]
+  - Minimal desert background
+  - The Sphinx (SVG silhouette)
+  - Respect meter (always visible, top-right)
+    Sphinx's Trust: 70
+    Caution Respect: 20
+    Speed Respect: 60
   ↓
-[Click NPC]
+[Traveler approaches Sphinx]
   ↓
-[Dialog Box opens]
-  NPC: "Your goal is to close the deal. Acme Corp just sent their MSA..."
-  (This is scenario.steps[0].body)
+[Sphinx poses riddle]
+  "Greetings, Traveler. Here is my first test..."
+  [Question from scenario.steps[0]]
   ↓
-[Multiple Choice Answers]
-  - "Use their MSA as starting point" (+relationship, +risk)
-  - "Propose our MSA instead" (+velocity, -risk)
-  - "Escalate to legal" (-velocity, -risk, -relationship)
+[Traveler chooses answer]
+  - Answer A
+  - Answer B
+  - Answer C
   ↓
-[Pick Answer]
+[Sphinx judges]
+  "Ah, you chose [answer]. Here is why..."
+  ✨ Unlocked: Sacred Scroll
+  📊 Respect updates
   ↓
-[Feedback + Reward]
-  NPC: "Good call! Here's why..."  (coach text)
-  📦 Unlocked: "Paper Precedence Tip"
-  🔴 Health: -5 (risk increased)
+[Next riddle or passage granted]
+  If more: Continue to next riddle
+  If done: "You have earned passage."
   ↓
-[Next Question or End]
-  If more steps: "Continue" → back to dialog
-  If done: Grade + treasures earned
-  ↓
-[Result Screen]
-  Grade: A / B / C / D / F
-  Treasures: 3/6 unlocked
-  Faith: Relationship 78, Risk 35, Velocity 65
-  [Replay] [Back to Scenarios]
+[Result: Merit & Scrolls]
+  Merit: WORTHY
+  Scrolls Earned: 4/6
+  Respect Stats displayed
+  [Replay] [Back to Oases]
 ```
 
 ---
 
-## Faith System (AE's "Alignment")
+## The Sphinx's Personality
 
-Instead of three abstract meters (velocity, risk, relation), we track **AE's philosophy**:
+The Sphinx is:
+- Wise but not patronizing
+- Patient (she's tested a thousand travelers)
+- Clear about trade-offs
+- Fair and honest
+- Capable of dry humor
+
+Her tone never changes; her respect meter does.
+
+---
+
+## Respect System (Always Visible)
 
 | Axis | Low (0) | Mid (50) | High (100) |
 |------|---------|----------|-----------|
-| **Relationship** | Cold, legal-first | Balanced | Sales-first, sweet deals |
-| **Risk Aversion** | Wild west (trust nothing) | Pragmatic | Risk-averse (block deals) |
-| **Velocity** | Slow, deliberate | Negotiator | Pusher, "sign now" |
-
-**How it evolves**:
-- Each choice has deltas: `{ relationship: +3, risk: -15, velocity: +8 }`
-- Faith updates after each answer
-- **Future (Phase 4+)**: NPC's tone shifts based on faith (e.g., if AE is too risk-averse, NPC says "You're overthinking this")
-
-**Unlock rules**:
-- "Paper Precedence Tip" unlocks if `velocity > 50` (AE moves fast)
-- "Super-Cap Negotiation" unlocks if `risk < 30` (AE is cautious)
-- Etc.
+| **Trust** | Reckless | Balanced | Wise |
+| **Caution** | Gambler | Pragmatic | Protects what matters |
+| **Speed** | Too slow | Realistic | Closes when it counts |
 
 ---
 
-## Treasures / Rewards
+## Sacred Scrolls & Wisdom Tablets
 
-Each scenario has **6 treasures** (one per step). Unlocking depends on faith + answer quality:
+**Sacred Scrolls** = Core contract templates (MSAs, DPAs)
+**Wisdom Tablets** = Specific clause guidance, tactics
 
-```javascript
-treasures = {
-  "acme-corp": [
-    { step: 0, label: "Paper Precedence Tip", icon: "📄", unlockIf: (faith) => faith.velocity > 50 },
-    { step: 1, label: "Super-Cap Negotiation", icon: "💰", unlockIf: (faith) => faith.riskAversion > 40 },
-    { step: 2, label: "Auto-Renewal Compromise", icon: "🔄", unlockIf: (faith) => faith.relationship > 60 },
-    // ...
-  ]
-};
-```
-
-**Health Pickups** (visual reward, optional):
-- NPC offers a coffee ☕ or water 💧 as small morale boost
-- No game mechanic yet; visual only
+Each represents knowledge the Traveler gains from the Sphinx's test.
 
 ---
 
-## Extension Points (for future phases)
+## Merit Levels (Replacing Grades)
 
-**Phase 6: Multiple Rooms**
 ```javascript
-world.rooms = {
-  office: { /* current */ },
-  negotiation_table: { /* new room */ },
-  executive_suite: { /* new room */ }
+MERIT = {
+  ENLIGHTENED: "The Sphinx bows slightly. 'You walk the way of masters.'",
+  WORTHY: "The Sphinx nods. 'You have proven your judgment.'",
+  PREPARED: "The Sphinx is satisfied. 'You will learn. Return when you understand more.'",
+  NOVICE: "The Sphinx is patient. 'You have much to learn. Return when you are ready.'",
+  UNWORTHY: "The Sphinx does not step aside. 'You are not ready. Return when prepared.'",
 };
-// Rename to navigate
-```
-
-**Phase 7: Multiple NPCs**
-```javascript
-npcs = {
-  "legal-coach": { /* current */ },
-  "sales-mentor": { /* new NPC */ },
-  "customer-contact": { /* new NPC */ }
-};
-// Click different NPCs for different dialog branches
-```
-
-**Phase 8: 3D Rendering**
-```javascript
-// Swap render.js:
-// OLD: renderDOM() using HTML/CSS
-// NEW: renderCanvas() or renderThreeJS()
-// Game logic unchanged
-```
-
-**Phase 9: Navigation**
-```javascript
-// Add arrow keys or click-to-move
-// Camera follows AE
-// NPCs have multiple positions per room
 ```
 
 ---
@@ -233,58 +248,58 @@ npcs = {
 ## File Structure (After Phase 1)
 
 ```
-index.html              (main entry point, imports modules)
+index.html
 ├── js/
-│   ├── game.js         (core game loop, state, faith system)
-│   ├── render.js       (DOM rendering; swappable for Canvas later)
-│   ├── data.js         (world.js + npcs.js combined)
-│   └── scenarios.js    (YOUR EXISTING SCENARIOS, unchanged)
+│   ├── game.js         (riddle flow, respect, merit)
+│   ├── render.js       (oasis rendering; swappable)
+│   ├── data.js         (oases, sphinx, scrolls, respect)
+│   └── scenarios.js    (YOUR EXISTING SCENARIOS)
 ├── assets/
-│   ├── office.svg      (room background)
-│   ├── npc-coach.svg   (NPC sprite)
+│   ├── oasis-desert.svg
+│   ├── sphinx-silhouette.svg
 │   └── ...
-└── DESIGN.md           (this file, for future devs)
+├── DESIGN.md
+└── THEME.md (optional: world-building, lore)
 ```
 
 ---
 
-## Phase Breakdown (Revised)
+## Phase Breakdown
 
-| Phase | Deliverable | What's New |
-|-------|-------------|-----------|
-| **1** | NPC dialog UI | Replace quiz layout with dialog box + choice buttons |
-| **2** | Room + NPC sprite | Add SVG room background + NPC sprite (CSS positioned) |
-| **3** | Click-to-talk interaction | Click NPC → dialog opens; can move on to next scenario |
-| **4** | Faith + treasures | Unlock treasures based on faith; show stats on result screen |
-| **5** | Polish | Animations, smooth transitions, visual juice |
-| **6+** | Extensions (defer) | Multiple rooms, NPCs, 3D, navigation |
-
----
-
-## Token Strategy by Phase
-
-- **Phase 1** (Sonnet): Refactor UI (moderate)
-- **Phase 2** (Sonnet): Add SVG/CSS (moderate)
-- **Phase 3** (Haiku): Event handlers (light)
-- **Phase 4** (Sonnet): Faith logic (moderate)
-- **Phase 5** (Haiku): CSS polish (light)
-- **Later phases**: Re-evaluate (Sonnet for architecture, Haiku for implementation)
+| Phase | Deliverable | Outcome |
+|-------|-------------|---------|
+| **1** | Riddle dialog UI | Sphinx asks, Traveler answers |
+| **2** | Oasis + Sphinx | Visual oasis appears |
+| **3** | Click-to-approach | Traveler can engage Sphinx |
+| **4** | Respect + scrolls | Traveler earns wisdom |
+| **5** | Polish | Sphinx feels alive |
+| **6+** | Extensions | More oases, animations, 3D |
 
 ---
 
-## Open Questions for You
+## Token Strategy
 
-1. **NPC visual style**: Simple SVG silhouette, or something with more personality (illustrated face)?
-2. **Room background**: Abstract/minimal, or realistic office photo?
-3. **Faith display**: Always visible (top-right stats bar), or only shown at end?
-4. **Treasures**: Show unlocked count per scenario ("3/6"), or hidden until end?
-5. **Tone**: Keep it professional, or add humor/flavor text?
+- Phase 1–2 (Sonnet): ~2200 tokens
+- Phase 3–4 (Sonnet/Haiku): ~1700 tokens
+- Phase 5 (Haiku): ~400 tokens
+- **Total MVP: ~4.3K tokens**
+
+---
+
+## Design Principles
+
+1. **One wise mentor** — The Sphinx recurs across all scenarios
+2. **Test, not fight** — Riddles are challenges; skill and preparation matter
+3. **Professional, but mythic** — Legal training wrapped in timeless story
+4. **Minimal aesthetics** — Desert, Sphinx, archway; no clutter
+5. **Data-driven, expandable** — JSON-driven; render layer swaps for future 3D
+6. **MVP mindset** — Multiple choice now; fancy animations later
 
 ---
 
 ## Next Steps
 
-- **You review** this design (offline, 0 tokens)
-- **You give feedback**: "approve", or "change X, Y, Z"
-- **Phase 0 done**: Commit DESIGN.md
-- **Phase 1 starts**: Refactor quiz → NPC dialog UI (Sonnet, ~1000 tokens)
+✅ **Gatekeeper Theme Approved**
+→ **Phase 1**: Refactor quiz → Sphinx riddle dialogue (Sonnet 4.6, ~1000 tokens)
+
+Ready for Phase 1?
