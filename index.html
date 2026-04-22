@@ -86,12 +86,26 @@
     transform: translateX(-50%);
     width: 240px; height: 110px;
     opacity: 0.45;
+    animation: archWeathering 8s ease-in-out infinite;
+  }
+  @keyframes archWeathering {
+    0%, 100% { opacity: 0.42; filter: brightness(0.92); }
+    25%      { opacity: 0.48; filter: brightness(0.98); }
+    50%      { opacity: 0.56; filter: brightness(1.12); }
+    75%      { opacity: 0.50; filter: brightness(1.04); }
   }
   .sand-dune {
     position: absolute; left: 0; right: 0; bottom: -1px;
     height: 28px;
     background: linear-gradient(180deg, transparent, rgba(180, 130, 60, 0.22) 60%, rgba(150, 100, 40, 0.35));
     border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+    animation: sandBreathe 9s ease-in-out infinite;
+  }
+  @keyframes sandBreathe {
+    0%, 100% { background: linear-gradient(180deg, transparent, rgba(180, 130, 60, 0.22) 60%, rgba(150, 100, 40, 0.35)); }
+    25%      { background: linear-gradient(180deg, transparent, rgba(190, 145, 70, 0.26) 60%, rgba(160, 110, 50, 0.38)); }
+    50%      { background: linear-gradient(180deg, transparent, rgba(210, 160, 80, 0.32) 60%, rgba(180, 130, 70, 0.42)); }
+    75%      { background: linear-gradient(180deg, transparent, rgba(195, 150, 75, 0.27) 60%, rgba(165, 120, 55, 0.40)); }
   }
   @media (max-width: 600px) {
     .oasis-scene { height: 80px; margin-bottom: 12px; }
@@ -136,6 +150,14 @@
     background: var(--panel); border: 1px solid var(--border);
     border-radius: 16px; padding: 22px 22px 18px;
     box-shadow: 0 20px 60px rgba(0,0,0,.35);
+    transition: box-shadow .3s ease;
+  }
+  .card:hover {
+    box-shadow: 0 20px 80px rgba(0,0,0,.5);
+  }
+  .card:hover .sphinx-avatar {
+    filter: brightness(1.18) drop-shadow(0 0 16px rgba(212, 168, 83, 0.9));
+    box-shadow: 0 0 56px rgba(212, 168, 83, 0.9), 0 0 80px rgba(212, 168, 83, 0.4), inset 0 0 18px rgba(255, 220, 150, 0.7);
   }
   .tag {
     display: inline-block; font-size: 11px; letter-spacing: 0.08em;
@@ -208,7 +230,7 @@
   }
   /* Respect user preference */
   @media (prefers-reduced-motion: reduce) {
-    .palm, .palm-right, .sphinx-avatar, body::before {
+    .palm, .palm-right, .sphinx-avatar, body::before, .archway-bg, .sand-dune {
       animation: none !important;
     }
   }
