@@ -261,11 +261,11 @@
   <div class="wrap">
     <header id="appHeader"></header>
 
-    <section class="meters" id="meters"></section>
+    <section class="meters" id="pillars"></section>
     <section id="stage"></section>
 
     <footer>
-      v0.2 &middot; Fictional company, fictional clauses &middot; Not legal advice. Always loop in <b>real</b> counsel on <b>real</b> deals.
+      v0.3 &middot; The Gatekeeper of the Oasis &middot; Fictional company, fictional clauses &middot; Not legal advice. Always loop in <b>real</b> counsel on <b>real</b> deals.
     </footer>
   </div>
 
@@ -276,10 +276,35 @@
  * can add new scenarios or steps later by editing JSON-ish structures.
  * -------------------------------------------------------------------- */
 
-const METERS = {
-  velocity:   { label: "Deal Velocity",        start: 60 },
-  risk:       { label: "Legal Risk Exposure",  start: 20 },
-  relation:   { label: "Customer Relationship", start: 70 },
+const PILLARS = {
+  passageKey:          { label: "Passage Key",          icon: "⚡", start: 60, barClass: "passage" },
+  ritualOfTrust:       { label: "Ritual of Trust",      icon: "🤝", start: 70, barClass: "trust" },
+  structuralIntegrity: { label: "Structural Integrity", icon: "🏛️", start: 80, barClass: "integrity" },
+};
+
+const SPHINX = {
+  name: "The Sphinx",
+  title: "Keeper of the Oases",
+  avatar: "🦁",
+};
+
+const SCROLLS = {
+  "acme-corp": [
+    { icon: "📜", name: "Scrolls of CloudForge (MSA)" },
+    { icon: "💰", name: "Wisdom of the Super-Cap" },
+    { icon: "🔄", name: "Scroll of Balanced Renewal" },
+    { icon: "🧠", name: "Guidance on IP Claims" },
+    { icon: "🔐", name: "Essence of Data Guardianship" },
+    { icon: "⚡", name: "Scroll of Swift Closure" },
+  ],
+  "startup-sweetheart": [
+    { icon: "🤝", name: "Quick Founder Walkthrough" },
+    { icon: "📋", name: "Verbal Side-Deal Log" },
+    { icon: "🔁", name: "Trial-to-Contract Playbook" },
+    { icon: "🔐", name: "DPA Basics Checklist" },
+    { icon: "✍️", name: "Signature Authority Guide" },
+    { icon: "📜", name: "Feature Commitment Playbook" },
+  ],
 };
 
 /* Each step has:
@@ -646,7 +671,7 @@ const state = {
   screen: "home",       // "home" | "playing" | "result"
   scenarioId: null,
   stepIndex: 0,
-  meters: { ...Object.fromEntries(Object.entries(METERS).map(([k,v]) => [k, v.start])) },
+  pillars: { ...Object.fromEntries(Object.entries(PILLARS).map(([k,v]) => [k, v.start])) },
   finished: false,
   awaitingNext: false,
   lastCoach: null,
@@ -654,7 +679,7 @@ const state = {
 };
 
 const $header = document.getElementById("appHeader");
-const $meters = document.getElementById("meters");
+const $pillars = document.getElementById("pillars");
 const $stage  = document.getElementById("stage");
 
 function clamp(n) { return Math.max(0, Math.min(100, n)); }
@@ -664,32 +689,39 @@ function currentScenario() { return SCENARIOS.find(s => s.id === state.scenarioI
 function getBestScore(id) {
   try {
     const raw = localStorage.getItem(`closethedeal_${id}_best`);
-    return raw ? JSON.parse(raw) : null;
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    // Backward compat: old saves used letter grades (A/B/C/D/F)
+    if (parsed.letter && !parsed.level) {
+      const map = { A:"ENLIGHTENED", B:"WORTHY", C:"PREPARED", D:"NOVICE", F:"UNWORTHY" };
+      parsed.level = map[parsed.letter] || parsed.letter;
+    }
+    return parsed;
   } catch { return null; }
 }
-function saveBestScore(id, score, letter) {
+function saveBestScore(id, score, level) {
   try {
     const cur = getBestScore(id);
     if (!cur || score > cur.score) {
-      localStorage.setItem(`closethedeal_${id}_best`, JSON.stringify({ score, letter }));
+      localStorage.setItem(`closethedeal_${id}_best`, JSON.stringify({ score, level }));
     }
   } catch { /* private browsing — skip silently */ }
 }
-function gradeColor(letter) {
-  if (letter === "A") return "var(--good)";
-  if (letter === "B") return "var(--accent)";
-  if (letter === "C") return "var(--warn)";
+function meritColor(level) {
+  if (level === "ENLIGHTENED") return "var(--good)";
+  if (level === "WORTHY")      return "var(--gold)";
+  if (level === "PREPARED")    return "var(--accent)";
+  if (level === "NOVICE")      return "var(--warn)";
   return "var(--bad)";
 }
 
-function renderMeters() {
-  $meters.innerHTML = Object.entries(METERS).map(([key, def]) => {
-    const val = clamp(state.meters[key]);
-    const barClass = key === "relation" ? "relation" : key;
+function renderPillars() {
+  $pillars.innerHTML = Object.entries(PILLARS).map(([key, def]) => {
+    const val = clamp(state.pillars[key]);
     return `
       <div class="meter">
-        <div class="label"><span>${def.label}</span><span class="value">${val}</span></div>
-        <div class="bar ${barClass}"><span style="width:${val}%"></span></div>
+        <div class="label"><span>${def.icon} ${def.label}</span><span class="value">${val}</span></div>
+        <div class="bar ${def.barClass}"><span style="width:${val}%"></span></div>
       </div>`;
   }).join("");
 }
@@ -698,22 +730,29 @@ function renderStep() {
   if (state.finished) return renderEnd();
   const scenario = currentScenario();
 
-  $meters.style.display = "";
+  $pillars.style.display = "";
   $header.innerHTML = `
-    <h1>Close the Deal</h1>
+    <h1>🏜️ The Gatekeeper of the Oasis</h1>
     <p>${scenario.title}</p>`;
-  renderMeters();
+  renderPillars();
 
   if (state.stepIndex === 0 && !state.introShown) {
-    // Intro card
+    // Intro card — you approach the oasis
     $stage.innerHTML = `
       <div class="card">
-        <span class="tag">Scenario</span>
+        <div class="sphinx-speaks">
+          <div class="sphinx-avatar">${SPHINX.avatar}</div>
+          <div class="sphinx-label">
+            <div class="sphinx-name">${SPHINX.name}</div>
+            <div class="sphinx-title">${SPHINX.title}</div>
+          </div>
+        </div>
+        <span class="tag">You approach the oasis</span>
         <h2 class="scene-title">${scenario.title}</h2>
         <div class="scene-body">${scenario.intro.replace(/\n/g,"<br/>")}</div>
         <div class="controls">
-          <button class="ghost" id="backHomeBtn">← Back to scenarios</button>
-          <button class="primary" id="startBtn">Start the deal →</button>
+          <button class="ghost" id="backHomeBtn">← Back to the oases</button>
+          <button class="primary" id="startBtn">Face the Sphinx →</button>
         </div>
       </div>`;
     document.getElementById("startBtn").onclick = () => {
@@ -725,8 +764,17 @@ function renderStep() {
   }
 
   const step = scenario.steps[state.stepIndex];
+  const riddleNum = state.stepIndex + 1;
+  const totalRiddles = scenario.steps.length;
   $stage.innerHTML = `
     <div class="card">
+      <div class="sphinx-speaks">
+        <div class="sphinx-avatar">${SPHINX.avatar}</div>
+        <div class="sphinx-label">
+          <div class="sphinx-name">${SPHINX.name}</div>
+          <div class="sphinx-title">poses riddle ${riddleNum} of ${totalRiddles}</div>
+        </div>
+      </div>
       <span class="tag">${step.tag}</span>
       <h2 class="scene-title">${step.title}</h2>
       <div class="scene-body">${step.body.replace(/\n/g,"<br/>")}</div>
@@ -745,15 +793,28 @@ function renderStep() {
   });
 }
 
+// Map legacy scenario deltas to the three pillars.
+// velocity → passageKey (same sign)
+// relation → ritualOfTrust (same sign)
+// risk → structuralIntegrity (INVERTED: +risk means -integrity)
+function mapDeltasToPillars(deltas) {
+  return {
+    passageKey:          deltas.velocity || 0,
+    ritualOfTrust:       deltas.relation || 0,
+    structuralIntegrity: -(deltas.risk   || 0),
+  };
+}
+
 function pickChoice(i) {
   const step = currentScenario().steps[state.stepIndex];
   const choice = step.choices[i];
+  const pillarDeltas = mapDeltasToPillars(choice.deltas);
 
-  // apply deltas (risk increases are "bad", so higher = worse)
-  for (const [k, v] of Object.entries(choice.deltas)) {
-    state.meters[k] = clamp(state.meters[k] + v);
+  // apply deltas to the three pillars
+  for (const [k, v] of Object.entries(pillarDeltas)) {
+    state.pillars[k] = clamp(state.pillars[k] + v);
   }
-  renderMeters();
+  renderPillars();
 
   // disable choice buttons
   document.querySelectorAll(".choice").forEach(b => {
@@ -762,27 +823,26 @@ function pickChoice(i) {
     b.style.cursor = "default";
   });
   // highlight chosen
-  document.querySelectorAll(".choice")[i].style.borderColor = "var(--accent)";
+  document.querySelectorAll(".choice")[i].style.borderColor = "var(--gold)";
   document.querySelectorAll(".choice")[i].style.opacity = 1;
 
-  // show coach
-  const deltasHtml = Object.entries(choice.deltas).map(([k,v]) => {
-    if (v === 0) return `<span class="delta neu">${METERS[k].label}: 0</span>`;
-    // Risk: positive delta = bad. Others: positive = good.
-    const isGood = (k === "risk") ? (v < 0) : (v > 0);
-    const cls = isGood ? "pos" : "neg";
+  // show Sphinx's judgment
+  const deltasHtml = Object.entries(pillarDeltas).map(([k,v]) => {
+    const def = PILLARS[k];
+    if (v === 0) return `<span class="delta neu">${def.icon} ${def.label}: 0</span>`;
+    const cls = v > 0 ? "pos" : "neg";
     const sign = v > 0 ? "+" : "";
-    return `<span class="delta ${cls}">${METERS[k].label}: ${sign}${v}</span>`;
+    return `<span class="delta ${cls}">${def.icon} ${def.label}: ${sign}${v}</span>`;
   }).join("");
 
   document.getElementById("coachSlot").innerHTML = `
     <div class="coach">
-      <h4>Legal Coach</h4>
+      <h4>The Sphinx Judges</h4>
       <div>${choice.coach}</div>
       <div class="deltas">${deltasHtml}</div>
     </div>`;
 
-  const nextLabel = state.stepIndex === currentScenario().steps.length - 1 ? "See your result →" : "Next step →";
+  const nextLabel = state.stepIndex === currentScenario().steps.length - 1 ? "Face the Sphinx's verdict →" : "Next riddle →";
   document.getElementById("controls").innerHTML =
     `<span></span><button class="primary" id="nextBtn">${nextLabel}</button>`;
   document.getElementById("nextBtn").onclick = advance;
@@ -801,57 +861,105 @@ function advance() {
 }
 
 function grade() {
-  // Lower risk is better. Combine into a 0-100 composite.
-  const { velocity, risk, relation } = state.meters;
-  const score = Math.round((velocity * 0.25) + ((100 - risk) * 0.55) + (relation * 0.20));
-  let letter, headline, body;
+  // Higher passageKey, structuralIntegrity, ritualOfTrust = better
+  const { passageKey, ritualOfTrust, structuralIntegrity } = state.pillars;
+  const score = Math.round((passageKey * 0.25) + (structuralIntegrity * 0.55) + (ritualOfTrust * 0.20));
+  let level, headline, body;
   if (score >= 85) {
-    letter = "A";
-    headline = "Deal closed. Legal bought you coffee.";
-    body = "You protected the company's risk posture without losing the relationship. This is what 'commercially sharp + legally aware' looks like.";
+    level = "ENLIGHTENED";
+    headline = "The Sphinx bows slightly.";
+    body = "'Swift, trustworthy, and sound. You walk the way of masters. The oasis is yours.'";
   } else if (score >= 70) {
-    letter = "B";
-    headline = "Deal closed with minor redlines outstanding.";
-    body = "Solid AE work. A couple of concessions will show up at renewal, but nothing that'll wake anyone up at 3am.";
+    level = "WORTHY";
+    headline = "The Sphinx nods.";
+    body = "'You have proven your judgment. You may pass.'";
   } else if (score >= 55) {
-    letter = "C";
-    headline = "Deal closed — but legal flagged issues for next cycle.";
-    body = "You got the signature. You also accepted commitments your team will have to live with. Worth a debrief with your SE and legal partner.";
+    level = "PREPARED";
+    headline = "The Sphinx is satisfied.";
+    body = "'You will learn. Return when you understand more.'";
   } else if (score >= 40) {
-    letter = "D";
-    headline = "Deal closed. Six months later, regrets.";
-    body = "Uncapped exposure, unclear data residency, or an IP trap you didn't see. Revenue now, invoice from counsel later.";
+    level = "NOVICE";
+    headline = "The Sphinx is patient.";
+    body = "'You have much to learn. The cracks in your foundation are clear. Return when you are ready.'";
   } else {
-    letter = "F";
-    headline = "Deal closed. Bankruptcy-adjacent.";
-    body = "Somewhere in this contract is the clause that will someday be quoted in a deposition. Please replay.";
+    level = "UNWORTHY";
+    headline = "The Sphinx does not step aside.";
+    body = "'You are not ready for this oasis. Your deal would shatter before the sun sets. Study and return.'";
   }
-  return { score, letter, headline, body };
+  return { score, level, headline, body };
+}
+
+function computeUnlockedScrolls(scenarioId, pillars) {
+  const { passageKey, ritualOfTrust, structuralIntegrity } = pillars;
+  const list = SCROLLS[scenarioId] || [];
+  const rules = {
+    "acme-corp": [
+      true,                           // always: CloudForge MSA (starting scroll)
+      structuralIntegrity >= 75,      // Super-Cap wisdom requires legal rigor
+      ritualOfTrust >= 70,            // Balanced Renewal requires trust
+      structuralIntegrity >= 80,      // IP Claim guidance requires rigor
+      structuralIntegrity >= 70,      // Data Guardianship requires rigor
+      passageKey >= 65,               // Swift Closure requires decisiveness
+    ],
+    "startup-sweetheart": [
+      true,                           // always: Founder Walkthrough (starting)
+      structuralIntegrity >= 70,      // Side-deal log requires rigor
+      structuralIntegrity >= 75,      // Trial-to-Contract requires rigor
+      structuralIntegrity >= 80,      // DPA checklist requires rigor
+      ritualOfTrust >= 65,            // Signature Authority requires trust
+      ritualOfTrust >= 70,            // Feature Commitment playbook
+    ],
+  };
+  const r = rules[scenarioId] || list.map(() => false);
+  return list.map((s, i) => ({ ...s, unlocked: !!r[i] }));
 }
 
 function renderEnd() {
   const g = grade();
   const scenario = currentScenario();
-  saveBestScore(scenario.id, g.score, g.letter);
+  saveBestScore(scenario.id, g.score, g.level);
 
-  $meters.style.display = "";
+  const scrolls = computeUnlockedScrolls(scenario.id, state.pillars);
+  const unlockedCount = scrolls.filter(s => s.unlocked).length;
+
+  $pillars.style.display = "";
   $header.innerHTML = `
-    <h1>Close the Deal</h1>
+    <h1>🏜️ The Gatekeeper of the Oasis</h1>
     <p>${scenario.title}</p>`;
-  renderMeters();
+  renderPillars();
+
+  const scrollListHtml = scrolls.map(s => `
+    <div class="scroll-item ${s.unlocked ? 'unlocked' : 'locked'}">
+      <span class="scroll-icon">${s.icon}</span>
+      <span class="scroll-name">${s.name}</span>
+      <span class="scroll-status">${s.unlocked ? '✓ Earned' : '✗ Locked'}</span>
+    </div>`).join("");
 
   $stage.innerHTML = `
     <div class="card">
-      <span class="tag">Result</span>
-      <div class="grade">
-        <div class="big" style="background: linear-gradient(90deg, ${gradeColor(g.letter)}, #a78bfa); -webkit-background-clip: text; background-clip: text; color: transparent;">${g.letter}</div>
-        <div class="sub">Composite score: ${g.score} / 100</div>
+      <div class="sphinx-speaks">
+        <div class="sphinx-avatar">${SPHINX.avatar}</div>
+        <div class="sphinx-label">
+          <div class="sphinx-name">${SPHINX.name}</div>
+          <div class="sphinx-title">${SPHINX.title}</div>
+        </div>
       </div>
-      <h2 class="scene-title" style="text-align:center; margin-top:14px">${g.headline}</h2>
-      <div class="scene-body" style="text-align:center">${g.body}</div>
+      <span class="tag">The Sphinx's Verdict</span>
+      <div class="grade">
+        <div class="merit-level" style="color:${meritColor(g.level)}">${g.level}</div>
+        <div class="big" style="background: linear-gradient(90deg, ${meritColor(g.level)}, var(--scroll-color)); -webkit-background-clip: text; background-clip: text; color: transparent;">${g.score}</div>
+        <div class="sub">Composite score / 100</div>
+      </div>
+      <div class="sphinx-verdict">
+        <strong>${g.headline}</strong><br>${g.body}
+      </div>
+      <div class="scrolls-earned">
+        <h4>Sacred Scrolls Earned — ${unlockedCount} / ${scrolls.length}</h4>
+        <div class="scroll-list">${scrollListHtml}</div>
+      </div>
       <div class="controls">
-        <button class="ghost" id="backHomeBtn">← Back to scenarios</button>
-        <button class="primary" id="replayBtn">↺ Replay scenario</button>
+        <button class="ghost" id="backHomeBtn">← Back to the oases</button>
+        <button class="primary" id="replayBtn">↺ Face the Sphinx again</button>
       </div>
     </div>`;
   document.getElementById("replayBtn").onclick = () => startScenario(scenario.id);
@@ -868,7 +976,7 @@ function startScenario(id) {
   state.awaitingNext = false;
   state.lastCoach = null;
   state.introShown = false;
-  state.meters = Object.fromEntries(Object.entries(METERS).map(([k,v]) => [k, v.start]));
+  state.pillars = Object.fromEntries(Object.entries(PILLARS).map(([k,v]) => [k, v.start]));
   render();
 }
 
@@ -886,10 +994,10 @@ function render() {
 }
 
 function renderHome() {
-  $meters.style.display = "none";
+  $pillars.style.display = "none";
   $header.innerHTML = `
-    <h1>Close the Deal</h1>
-    <p>A legal literacy game for SaaS account executives. Pick a scenario. Test your contract instincts. No lawyers harmed.</p>`;
+    <h1>🏜️ The Gatekeeper of the Oasis</h1>
+    <p>A legal wisdom trial for SaaS account executives. You are the Traveler. Choose an oasis. Face the Sphinx. Earn sacred scrolls through wise judgment.</p>`;
 
   // Progress summary
   const played = SCENARIOS.filter(s => getBestScore(s.id)).length;
@@ -900,15 +1008,15 @@ function renderHome() {
     .sort((a, b) => b.score - a.score)[0];
   const summaryHtml = `
     <div class="progress-summary">
-      <div class="stat"><b>${played}</b> / ${total} scenarios played</div>
-      ${bestGrade ? `<div class="stat">Personal best: <b style="color:${gradeColor(bestGrade.letter)}">${bestGrade.letter}</b> (${bestGrade.score})</div>` : ""}
+      <div class="stat"><b>${played}</b> / ${total} oases tested</div>
+      ${bestGrade ? `<div class="stat">Highest merit: <b style="color:${meritColor(bestGrade.level)}">${bestGrade.level}</b> (${bestGrade.score})</div>` : ""}
     </div>`;
 
   const cardsHtml = SCENARIOS.map(s => {
     const best = getBestScore(s.id);
     const bestHtml = best
-      ? `Best: <span class="grade-badge" style="color:${gradeColor(best.letter)}">${best.letter}</span> (${best.score})`
-      : `Not played yet`;
+      ? `Best: <span class="grade-badge" style="color:${meritColor(best.level)}">${best.level}</span> (${best.score})`
+      : `Not yet faced`;
     const topicsHtml = s.topics.map(t => `<span class="sc-topic">${t}</span>`).join("");
     const diffClass = s.difficulty.toLowerCase();
     return `
@@ -923,9 +1031,9 @@ function renderHome() {
         <div class="sc-footer">
           <div>
             <div class="sc-best">${bestHtml}</div>
-            <div class="sc-steps">${s.steps.length} decisions</div>
+            <div class="sc-steps">${s.steps.length} riddles</div>
           </div>
-          <span class="sc-play">Play →</span>
+          <span class="sc-play">Approach →</span>
         </div>
       </div>`;
   }).join("");
