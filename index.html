@@ -3,15 +3,17 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Close the Deal — A Legal Literacy Game for SaaS AEs</title>
+<title>The Gatekeeper of the Oasis — Legal Wisdom for SaaS AEs</title>
 <style>
   :root {
-    --bg: #0f1222;
-    --panel: #181c32;
-    --panel-2: #1f2441;
+    --bg: #0f1117;
+    --panel: #181c2e;
+    --panel-2: #1c2040;
     --ink: #eef0ff;
     --muted: #9aa0c7;
     --accent: #7c9cff;
+    --gold: #d4a853;
+    --scroll-color: #a78bfa;
     --good: #4ade80;
     --warn: #fbbf24;
     --bad: #f87171;
@@ -55,9 +57,9 @@
     display: block; height: 100%;
     transition: width .35s ease;
   }
-  .bar.velocity > span { background: linear-gradient(90deg, #60a5fa, #7c9cff); }
-  .bar.risk > span { background: linear-gradient(90deg, #4ade80, #fbbf24, #f87171); }
-  .bar.relation > span { background: linear-gradient(90deg, #f472b6, #a78bfa); }
+  .bar.passage > span    { background: linear-gradient(90deg, #f0a500, #d4a853); }
+  .bar.trust > span      { background: linear-gradient(90deg, #f472b6, #a78bfa); }
+  .bar.integrity > span  { background: linear-gradient(90deg, #4ade80, #22d3ee); }
 
   .card {
     background: var(--panel); border: 1px solid var(--border);
@@ -91,14 +93,34 @@
   .choice:active { transform: translateY(1px); }
 
   .coach {
-    margin-top: 14px; padding: 14px 16px;
-    background: #121636; border: 1px solid var(--border);
-    border-left: 3px solid var(--accent);
-    border-radius: 10px; font-size: 14px; line-height: 1.55;
+    margin-top: 16px; padding: 16px 18px;
+    background: #0e1128; border: 1px solid var(--border);
+    border-left: 3px solid var(--gold);
+    border-radius: 10px; font-size: 14px; line-height: 1.6;
   }
   .coach h4 {
-    margin: 0 0 6px; font-size: 12px; color: var(--accent);
-    text-transform: uppercase; letter-spacing: 0.08em;
+    margin: 0 0 8px; font-size: 11px; color: var(--gold);
+    text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600;
+  }
+  .sphinx-speaks {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
+  }
+  .sphinx-avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: linear-gradient(135deg, #d4a853, #a07830);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; flex-shrink: 0;
+    border: 2px solid rgba(212, 168, 83, 0.4);
+  }
+  .sphinx-label {
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .sphinx-name {
+    font-size: 12px; color: var(--gold); text-transform: uppercase;
+    letter-spacing: 0.1em; font-weight: 600;
+  }
+  .sphinx-title {
+    font-size: 11px; color: var(--muted);
   }
   .deltas {
     display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;
@@ -123,14 +145,46 @@
   button.ghost:hover { color: var(--ink); border-color: var(--accent); }
 
   .grade {
-    text-align: center; padding: 12px 0 4px;
+    text-align: center; padding: 16px 0 8px;
+  }
+  .grade .merit-level {
+    font-size: 13px; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--gold); font-weight: 600; margin-bottom: 10px;
   }
   .grade .big {
-    font-size: 52px; font-weight: 700; letter-spacing: -0.02em;
-    background: linear-gradient(90deg, #7c9cff, #a78bfa);
+    font-size: 56px; font-weight: 700; letter-spacing: -0.02em;
+    background: linear-gradient(90deg, #d4a853, #a78bfa);
     -webkit-background-clip: text; background-clip: text; color: transparent;
+    line-height: 1;
   }
-  .grade .sub { color: var(--muted); margin-top: 4px; }
+  .grade .sub { color: var(--muted); margin-top: 8px; font-size: 14px; }
+  .sphinx-verdict {
+    background: var(--panel-2); border: 1px solid rgba(212,168,83,0.3);
+    border-left: 3px solid var(--gold);
+    border-radius: 10px; padding: 16px 18px;
+    font-size: 15px; line-height: 1.6; color: #d7daf5;
+    margin: 16px 0;
+    font-style: italic;
+  }
+  .scrolls-earned { margin: 16px 0; }
+  .scrolls-earned h4 {
+    font-size: 12px; color: var(--muted); text-transform: uppercase;
+    letter-spacing: 0.08em; margin: 0 0 10px;
+  }
+  .scroll-list { display: flex; flex-direction: column; gap: 6px; }
+  .scroll-item {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13px; padding: 8px 12px;
+    background: var(--panel-2); border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .scroll-item.unlocked { border-color: rgba(167,139,250,0.4); color: var(--ink); }
+  .scroll-item.locked { opacity: 0.4; }
+  .scroll-icon { font-size: 16px; }
+  .scroll-name { flex: 1; }
+  .scroll-status { font-size: 11px; }
+  .scroll-item.unlocked .scroll-status { color: var(--good); }
+  .scroll-item.locked .scroll-status { color: var(--muted); }
 
   footer { color: var(--muted); font-size: 12px; margin-top: 24px; text-align: center; }
   footer b { color: #cfd3f5; }
@@ -158,7 +212,7 @@
     transition: border-color .15s ease, background .15s ease, transform .06s ease;
     animation: fadeInUp .3s ease both;
   }
-  .scenario-card:hover { border-color: var(--accent); background: #1c2148; }
+  .scenario-card:hover { border-color: var(--gold); background: #1c2040; }
   .scenario-card:active { transform: translateY(1px); }
   .scenario-card:nth-child(2) { animation-delay: .05s; }
   .scenario-card:nth-child(3) { animation-delay: .10s; }
@@ -199,7 +253,7 @@
   }
   .sc-best { font-size: 12px; color: var(--muted); }
   .sc-best .grade-badge { font-weight: 700; }
-  .sc-play { font-size: 13px; font-weight: 600; color: var(--accent); }
+  .sc-play { font-size: 13px; font-weight: 600; color: var(--gold); }
   .sc-steps { font-size: 11px; color: var(--muted); }
 </style>
 </head>
