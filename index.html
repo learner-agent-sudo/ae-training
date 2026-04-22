@@ -53,8 +53,24 @@
     display: flex; align-items: flex-end; justify-content: space-between;
     pointer-events: none;
   }
-  .palm { width: 90px; height: 120px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4)); }
-  .palm-right { transform: scaleX(-1); }
+  .palm {
+    width: 90px; height: 120px;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
+    transform-origin: 50% 100%;
+    animation: palmSway 6s ease-in-out infinite;
+  }
+  .palm-right {
+    transform: scaleX(-1);
+    animation: palmSwayMirror 7s ease-in-out infinite 0.5s;
+  }
+  @keyframes palmSway {
+    0%, 100% { transform: rotate(-1.2deg); }
+    50%      { transform: rotate(1.5deg); }
+  }
+  @keyframes palmSwayMirror {
+    0%, 100% { transform: scaleX(-1) rotate(-1.5deg); }
+    50%      { transform: scaleX(-1) rotate(1.2deg); }
+  }
   .archway-bg {
     position: absolute; left: 50%; bottom: 0;
     transform: translateX(-50%);
@@ -160,6 +176,23 @@
     overflow: hidden;
   }
   .sphinx-avatar svg { width: 32px; height: 32px; display: block; }
+  .sphinx-avatar {
+    animation: sphinxGlow 4s ease-in-out infinite;
+  }
+  @keyframes sphinxGlow {
+    0%, 100% { box-shadow: 0 0 14px rgba(212, 168, 83, 0.3), inset 0 0 8px rgba(255, 220, 150, 0.22); }
+    50%      { box-shadow: 0 0 22px rgba(212, 168, 83, 0.55), inset 0 0 10px rgba(255, 220, 150, 0.35); }
+  }
+  /* Subtle star twinkle */
+  body::before { animation: twinkle 8s ease-in-out infinite; }
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.8; }
+    50%      { opacity: 1; }
+  }
+  /* Respect user preference */
+  @media (prefers-reduced-motion: reduce) {
+    .palm, .palm-right, .sphinx-avatar, body::before { animation: none !important; }
+  }
   .sphinx-label {
     display: flex; flex-direction: column; gap: 2px;
   }
