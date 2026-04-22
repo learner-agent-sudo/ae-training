@@ -44,6 +44,34 @@
     z-index: 0;
   }
   .wrap { position: relative; z-index: 1; }
+
+  /* Oasis horizon scene (palm trees + archway) */
+  .oasis-scene {
+    position: relative;
+    height: 120px;
+    margin: 0 -8px 20px;
+    display: flex; align-items: flex-end; justify-content: space-between;
+    pointer-events: none;
+  }
+  .palm { width: 90px; height: 120px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4)); }
+  .palm-right { transform: scaleX(-1); }
+  .archway-bg {
+    position: absolute; left: 50%; bottom: 0;
+    transform: translateX(-50%);
+    width: 240px; height: 110px;
+    opacity: 0.45;
+  }
+  .sand-dune {
+    position: absolute; left: 0; right: 0; bottom: -1px;
+    height: 28px;
+    background: linear-gradient(180deg, transparent, rgba(180, 130, 60, 0.22) 60%, rgba(150, 100, 40, 0.35));
+    border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+  }
+  @media (max-width: 600px) {
+    .oasis-scene { height: 80px; margin-bottom: 12px; }
+    .palm { width: 60px; height: 80px; }
+    .archway-bg { width: 160px; height: 70px; }
+  }
   .wrap { max-width: 900px; margin: 0 auto; padding: 40px 24px 100px; }
   header h1 {
     font-size: 32px; margin: 0 0 8px;
@@ -279,6 +307,65 @@
 </head>
 <body>
   <div class="wrap">
+    <div class="oasis-scene" aria-hidden="true">
+      <svg class="palm palm-left" viewBox="0 0 90 120" xmlns="http://www.w3.org/2000/svg">
+        <!-- Trunk -->
+        <path d="M45 120 Q40 85 48 45" stroke="#3e2c14" stroke-width="5" fill="none" stroke-linecap="round"/>
+        <!-- Trunk ring texture -->
+        <g stroke="#5a4020" stroke-width="0.8" fill="none" opacity="0.6">
+          <path d="M42 100 Q45 99 48 100"/>
+          <path d="M42 85 Q46 84 49 85"/>
+          <path d="M43 70 Q47 69 50 70"/>
+          <path d="M45 55 Q49 54 51 55"/>
+        </g>
+        <!-- Fronds (5 broad palm leaves) -->
+        <g fill="#2d5f3f" opacity="0.9">
+          <path d="M48 45 Q28 42 8 52 Q25 44 48 48 Z"/>
+          <path d="M48 45 Q70 42 86 55 Q72 45 48 48 Z"/>
+          <path d="M48 45 Q28 30 18 12 Q36 28 48 44 Z"/>
+          <path d="M48 45 Q68 30 78 15 Q60 28 48 44 Z"/>
+          <path d="M48 45 Q48 25 46 8 Q52 25 50 44 Z"/>
+        </g>
+        <!-- Coconut cluster -->
+        <g fill="#6b4a20">
+          <circle cx="46" cy="46" r="2"/>
+          <circle cx="50" cy="47" r="1.6"/>
+        </g>
+      </svg>
+
+      <svg class="archway-bg" viewBox="0 0 240 110" xmlns="http://www.w3.org/2000/svg">
+        <!-- Outer arch silhouette -->
+        <path d="M20 110 L20 60 Q20 12 120 12 Q220 12 220 60 L220 110 Z" fill="#1a1220" opacity="0.5"/>
+        <!-- Inner arch opening (lighter) -->
+        <path d="M55 110 L55 70 Q55 40 120 40 Q185 40 185 70 L185 110 Z" fill="#2a1f2e" opacity="0.7"/>
+        <!-- Arch trim -->
+        <path d="M20 60 Q20 12 120 12 Q220 12 220 60" fill="none" stroke="#c9a04a" stroke-width="1.5" opacity="0.55"/>
+      </svg>
+
+      <svg class="palm palm-right" viewBox="0 0 90 120" xmlns="http://www.w3.org/2000/svg">
+        <path d="M45 120 Q40 85 48 45" stroke="#3e2c14" stroke-width="5" fill="none" stroke-linecap="round"/>
+        <g stroke="#5a4020" stroke-width="0.8" fill="none" opacity="0.6">
+          <path d="M42 100 Q45 99 48 100"/>
+          <path d="M42 85 Q46 84 49 85"/>
+          <path d="M43 70 Q47 69 50 70"/>
+          <path d="M45 55 Q49 54 51 55"/>
+        </g>
+        <g fill="#2d5f3f" opacity="0.9">
+          <path d="M48 45 Q28 42 8 52 Q25 44 48 48 Z"/>
+          <path d="M48 45 Q70 42 86 55 Q72 45 48 48 Z"/>
+          <path d="M48 45 Q28 30 18 12 Q36 28 48 44 Z"/>
+          <path d="M48 45 Q68 30 78 15 Q60 28 48 44 Z"/>
+          <path d="M48 45 Q48 25 46 8 Q52 25 50 44 Z"/>
+        </g>
+        <g fill="#6b4a20">
+          <circle cx="46" cy="46" r="2"/>
+          <circle cx="50" cy="47" r="1.6"/>
+        </g>
+      </svg>
+
+      <div class="sand-dune"></div>
+    </div>
+
     <header id="appHeader"></header>
 
     <section class="meters" id="pillars"></section>
