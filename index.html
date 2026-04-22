@@ -123,12 +123,15 @@
     display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
   }
   .sphinx-avatar {
-    width: 40px; height: 40px; border-radius: 50%;
-    background: linear-gradient(135deg, #d4a853, #a07830);
+    width: 44px; height: 44px; border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #e8c37a, #b8882f 60%, #8a5e1c);
     display: flex; align-items: center; justify-content: center;
-    font-size: 20px; flex-shrink: 0;
-    border: 2px solid rgba(212, 168, 83, 0.4);
+    flex-shrink: 0;
+    border: 2px solid rgba(240, 196, 114, 0.55);
+    box-shadow: 0 0 16px rgba(212, 168, 83, 0.35), inset 0 0 8px rgba(255, 220, 150, 0.25);
+    overflow: hidden;
   }
+  .sphinx-avatar svg { width: 32px; height: 32px; display: block; }
   .sphinx-label {
     display: flex; flex-direction: column; gap: 2px;
   }
@@ -302,7 +305,30 @@ const PILLARS = {
 const SPHINX = {
   name: "The Sphinx",
   title: "Keeper of the Oases",
-  avatar: "🦁",
+  avatar: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+    <defs>
+      <linearGradient id="sphinxGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#3a2510"/>
+        <stop offset="1" stop-color="#1a0f06"/>
+      </linearGradient>
+    </defs>
+    <g fill="url(#sphinxGrad)" stroke="none">
+      <!-- Lion body / base (reclining) -->
+      <path d="M4 30 Q4 26 8 25 L14 25 Q15 22 18 22 L26 22 Q30 22 32 26 L35 26 Q36 28 35 31 L4 31 Z"/>
+      <!-- Pharaoh head + nemes (trapezoidal headdress) -->
+      <path d="M18 9 Q17 7 20 6 L28 6 Q32 6 32 11 L33 18 Q33 23 28 23 L22 23 Q18 23 18 18 Z"/>
+      <!-- Front paws hint -->
+      <path d="M6 31 L9 31 L9 33 L6 33 Z M12 31 L15 31 L15 33 L12 33 Z"/>
+    </g>
+    <!-- Nemes stripe detail -->
+    <g stroke="#c9a04a" stroke-width="0.4" opacity="0.7" fill="none">
+      <line x1="19" y1="13" x2="32" y2="13"/>
+      <line x1="19" y1="17" x2="32" y2="17"/>
+      <line x1="20" y1="21" x2="31" y2="21"/>
+    </g>
+    <!-- Eye dot -->
+    <circle cx="24" cy="14" r="0.7" fill="#f0c472"/>
+  </svg>`,
 };
 
 const SCROLLS = {
