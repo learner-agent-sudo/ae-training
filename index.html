@@ -179,6 +179,31 @@
     0%, 100% { transform: translateY(0px); }
     50%      { transform: translateY(-3px); }
   }
+  /* THE SPHINX — full character in scene */
+  .sphinx-character {
+    position: absolute;
+    right: 24px; bottom: 32px;
+    width: 260px; height: 340px;
+    z-index: 6;
+    transform-origin: center bottom;
+    animation: sphinxCharBreathe 5s ease-in-out infinite;
+    pointer-events: auto;
+    cursor: default;
+  }
+  @keyframes sphinxCharBreathe {
+    0%, 100% { transform: translateY(0) scaleY(1); }
+    50%      { transform: translateY(-2px) scaleY(1.012); }
+  }
+  /* On card hover, Sphinx shifts attention */
+  .card:hover ~ .oasis-scene .sphinx-character,
+  .wrap:has(.card:hover) .sphinx-character {
+    animation: sphinxCharAttention 0.6s ease-out, sphinxCharBreathe 5s ease-in-out 0.6s infinite;
+  }
+  @keyframes sphinxCharAttention {
+    0%   { transform: translateY(0); filter: brightness(1); }
+    50%  { transform: translateY(-4px); filter: brightness(1.15) drop-shadow(0 0 20px rgba(212, 168, 83, 0.6)); }
+    100% { transform: translateY(0); filter: brightness(1); }
+  }
   /* Distant mountain range silhouette */
   .distant-mountains {
     position: absolute; left: 0; right: 0; bottom: 90px;
@@ -246,6 +271,7 @@
     .light-shaft { width: 90px; height: 220px; top: 50px; right: 30px; }
     .sand-dune { height: 50px; }
     .sand-dune-back { bottom: 32px; height: 35px; }
+    .sphinx-character { width: 170px; height: 220px; right: 10px; bottom: 18px; }
   }
   .wrap { max-width: 900px; margin: 0 auto; padding: 40px 24px 100px; }
   header h1 {
@@ -366,7 +392,8 @@
   /* Respect user preference */
   @media (prefers-reduced-motion: reduce) {
     .palm, .palm-right, .sphinx-avatar, body::before, .archway-bg, .sand-dune,
-    .sky-aurora, .moon, .light-shaft, .horizon-glow, .distant-pyramids {
+    .sky-aurora, .moon, .light-shaft, .horizon-glow, .distant-pyramids,
+    .sphinx-character {
       animation: none !important;
     }
   }
@@ -632,6 +659,163 @@
         <g fill="#6b4a20">
           <circle cx="46" cy="46" r="2"/>
           <circle cx="50" cy="47" r="1.6"/>
+        </g>
+      </svg>
+
+      <svg class="sphinx-character" viewBox="0 0 280 360" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="stoneBody" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#d4a06a"/>
+            <stop offset="0.45" stop-color="#9a6c38"/>
+            <stop offset="1" stop-color="#3a2412"/>
+          </linearGradient>
+          <linearGradient id="stoneFace" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#e0b88a"/>
+            <stop offset="0.55" stop-color="#a47850"/>
+            <stop offset="1" stop-color="#4e321a"/>
+          </linearGradient>
+          <linearGradient id="nemesBlue" x1="0" y1="0" x2="0.2" y2="1">
+            <stop offset="0" stop-color="#3562a0"/>
+            <stop offset="0.55" stop-color="#1c3a6e"/>
+            <stop offset="1" stop-color="#091838"/>
+          </linearGradient>
+          <linearGradient id="nemesGold" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#f4d880"/>
+            <stop offset="0.5" stop-color="#c89a3a"/>
+            <stop offset="1" stop-color="#6e4c18"/>
+          </linearGradient>
+          <radialGradient id="eyeGlow" cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0" stop-color="#fff2c0"/>
+            <stop offset="0.35" stop-color="#f0b838"/>
+            <stop offset="0.75" stop-color="#8a5818"/>
+            <stop offset="1" stop-color="#2a1408"/>
+          </radialGradient>
+          <linearGradient id="stoneShade" x1="0" y1="0" x2="0.3" y2="1">
+            <stop offset="0" stop-color="#5a3820"/>
+            <stop offset="1" stop-color="#1c0e06"/>
+          </linearGradient>
+          <filter id="sphinxDropShadow" x="-20%" y="-10%" width="140%" height="120%">
+            <feDropShadow dx="2" dy="6" stdDeviation="8" flood-color="#000" flood-opacity="0.55"/>
+          </filter>
+        </defs>
+
+        <g filter="url(#sphinxDropShadow)">
+          <!-- TAIL curled around body (back layer) -->
+          <path d="M40 280 Q12 295 8 320 Q6 340 22 342 Q42 338 54 322 Q48 308 52 290 Z"
+                fill="url(#stoneShade)" opacity="0.85"/>
+
+          <!-- LION BODY / hindquarters (large mass) -->
+          <path d="M32 340
+                   Q22 290 44 244
+                   Q78 206 140 204
+                   L232 212
+                   Q260 240 270 288
+                   Q272 326 260 356
+                   L36 356 Z"
+                fill="url(#stoneBody)"/>
+
+          <!-- Body shading overlay (right side darker, suggests mass) -->
+          <path d="M140 210 L232 214 Q258 240 268 286 Q270 324 258 354 L200 354 Q216 300 210 250 Q186 218 140 212 Z"
+                fill="url(#stoneShade)" opacity="0.35"/>
+
+          <!-- Front-left paw -->
+          <path d="M56 354 L56 302 Q58 292 70 290 L96 290 Q100 316 98 356 Z"
+                fill="url(#stoneBody)"/>
+          <!-- Paw toe lines -->
+          <g stroke="#3a2210" stroke-width="1" fill="none" opacity="0.6">
+            <path d="M62 352 L62 344"/>
+            <path d="M72 352 L72 344"/>
+            <path d="M82 352 L82 344"/>
+            <path d="M92 352 L92 344"/>
+          </g>
+
+          <!-- Front-right paw (slightly behind/smaller for perspective) -->
+          <path d="M174 356 L174 312 Q176 302 186 300 L210 300 Q214 328 214 358 Z"
+                fill="url(#stoneBody)" opacity="0.92"/>
+          <g stroke="#3a2210" stroke-width="1" fill="none" opacity="0.55">
+            <path d="M180 354 L180 346"/>
+            <path d="M190 354 L190 346"/>
+            <path d="M200 354 L200 346"/>
+          </g>
+
+          <!-- Chest/torso (upright, between body and head) -->
+          <path d="M102 210
+                   Q96 176 122 156
+                   L180 152
+                   Q204 170 200 212 Z"
+                fill="url(#stoneBody)"/>
+
+          <!-- Chest pectoral ornament (gold pendant) -->
+          <path d="M140 180 L160 180 L166 200 L150 212 L134 200 Z"
+                fill="url(#nemesGold)" opacity="0.9"/>
+          <circle cx="150" cy="195" r="4" fill="#6e4c18" opacity="0.7"/>
+          <circle cx="150" cy="195" r="2" fill="#f4d880"/>
+
+          <!-- NEMES HEADDRESS -->
+          <path d="M104 114
+                   Q106 84 148 76
+                   L176 76
+                   Q206 80 212 112
+                   L222 170
+                   Q222 184 210 188
+                   L100 188
+                   Q90 184 92 170 Z"
+                fill="url(#nemesBlue)"/>
+
+          <!-- Nemes gold stripes (horizontal) -->
+          <rect x="92" y="112" width="130" height="6" fill="url(#nemesGold)" opacity="0.9"/>
+          <rect x="92" y="130" width="130" height="5" fill="url(#nemesGold)" opacity="0.85"/>
+          <rect x="92" y="148" width="130" height="5" fill="url(#nemesGold)" opacity="0.8"/>
+          <rect x="92" y="166" width="130" height="4" fill="url(#nemesGold)" opacity="0.75"/>
+          <rect x="92" y="180" width="130" height="3" fill="url(#nemesGold)" opacity="0.7"/>
+
+          <!-- Nemes shadow on sides -->
+          <path d="M92 114 L92 182 Q94 186 100 188 L108 188 L108 120 Z"
+                fill="#000" opacity="0.25"/>
+          <path d="M222 114 L222 182 Q220 186 214 188 L206 188 L206 120 Z"
+                fill="#000" opacity="0.3"/>
+
+          <!-- FACE emerging from nemes -->
+          <ellipse cx="157" cy="130" rx="34" ry="40" fill="url(#stoneFace)"/>
+          <!-- Face left-side shadow -->
+          <path d="M157 90 Q128 92 124 130 Q128 164 157 168 L157 130 Z"
+                fill="#000" opacity="0.08"/>
+          <!-- Face right-side shadow (stronger, moon is right) -->
+          <path d="M157 90 Q186 92 190 130 Q186 164 157 168 L157 130 Z"
+                fill="url(#stoneShade)" opacity="0.22"/>
+
+          <!-- Brow ridge -->
+          <path d="M128 120 Q144 112 158 114 Q172 112 186 120"
+                stroke="#4a2c14" stroke-width="1.6" fill="none" opacity="0.75"/>
+
+          <!-- EYES (the signature detail) -->
+          <g class="sphinx-eye">
+            <ellipse cx="144" cy="128" rx="5" ry="3.5" fill="url(#eyeGlow)"/>
+            <circle cx="144" cy="128" r="1.6" fill="#1a0a00"/>
+            <circle cx="145" cy="127" r="0.6" fill="#fff4c0"/>
+          </g>
+          <g class="sphinx-eye">
+            <ellipse cx="170" cy="128" rx="5" ry="3.5" fill="url(#eyeGlow)"/>
+            <circle cx="170" cy="128" r="1.6" fill="#1a0a00"/>
+            <circle cx="171" cy="127" r="0.6" fill="#fff4c0"/>
+          </g>
+
+          <!-- Nose (stylized wedge) -->
+          <path d="M156 136 L160 146 L157 150 Q154 150 152 146 Z"
+                fill="#5a3818" opacity="0.55"/>
+
+          <!-- Mouth (stern, flat) -->
+          <path d="M146 156 Q157 158 168 156"
+                stroke="#2a1608" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+          <!-- Upper lip highlight -->
+          <path d="M148 155 Q157 156.5 166 155"
+                stroke="#c49468" stroke-width="0.6" fill="none" opacity="0.5"/>
+
+          <!-- Ceremonial beard (pharaoh style) -->
+          <path d="M152 168 L153 188 L157 194 L161 188 L162 168 Z"
+                fill="url(#nemesGold)" opacity="0.85"/>
+          <path d="M154 172 L160 172 M154 178 L160 178 M155 184 L159 184"
+                stroke="#6e4c18" stroke-width="0.5" opacity="0.7"/>
         </g>
       </svg>
 
