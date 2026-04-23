@@ -204,6 +204,52 @@
     50%  { transform: translateY(-4px); filter: brightness(1.15) drop-shadow(0 0 20px rgba(212, 168, 83, 0.6)); }
     100% { transform: translateY(0); filter: brightness(1); }
   }
+  /* Sphinx eye glow — pulses with inner fire */
+  .sphinx-eye {
+    transform-origin: center;
+    transform-box: fill-box;
+    animation: eyeBlink 6.5s ease-in-out infinite;
+  }
+  .sphinx-eye:nth-of-type(2) {
+    animation-delay: 0.08s;
+  }
+  .sphinx-eye ellipse {
+    animation: eyeGlow 4.2s ease-in-out infinite;
+    transform-origin: center;
+    transform-box: fill-box;
+  }
+  @keyframes eyeGlow {
+    0%, 100% {
+      filter: drop-shadow(0 0 2px rgba(240, 184, 56, 0.55));
+      opacity: 0.9;
+    }
+    50% {
+      filter: drop-shadow(0 0 5px rgba(240, 184, 56, 0.95)) drop-shadow(0 0 14px rgba(255, 200, 100, 0.65));
+      opacity: 1;
+    }
+  }
+  @keyframes eyeBlink {
+    0%, 93%, 100% { transform: scaleY(1); }
+    95%, 96%      { transform: scaleY(0.08); }
+    97%           { transform: scaleY(1); }
+  }
+  /* On card hover — eyes burn brighter, blink faster */
+  .wrap:has(.card:hover) .sphinx-eye ellipse {
+    animation: eyeGlowIntense 1.6s ease-in-out infinite;
+  }
+  .wrap:has(.card:hover) .sphinx-eye {
+    animation: eyeBlink 3.8s ease-in-out infinite;
+  }
+  @keyframes eyeGlowIntense {
+    0%, 100% {
+      filter: drop-shadow(0 0 4px rgba(255, 200, 80, 0.8));
+      opacity: 1;
+    }
+    50% {
+      filter: drop-shadow(0 0 10px rgba(255, 220, 100, 1)) drop-shadow(0 0 22px rgba(255, 200, 80, 0.85));
+      opacity: 1;
+    }
+  }
   /* Distant mountain range silhouette */
   .distant-mountains {
     position: absolute; left: 0; right: 0; bottom: 90px;
@@ -393,7 +439,7 @@
   @media (prefers-reduced-motion: reduce) {
     .palm, .palm-right, .sphinx-avatar, body::before, .archway-bg, .sand-dune,
     .sky-aurora, .moon, .light-shaft, .horizon-glow, .distant-pyramids,
-    .sphinx-character {
+    .sphinx-character, .sphinx-eye, .sphinx-eye ellipse {
       animation: none !important;
     }
   }
