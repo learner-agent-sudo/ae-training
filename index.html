@@ -179,6 +179,69 @@
     0%, 100% { transform: translateY(0px); }
     50%      { transform: translateY(-3px); }
   }
+  /* ATMOSPHERIC PARTICLES — dust motes drifting in moonlight */
+  .dust-motes {
+    position: absolute; inset: 0;
+    pointer-events: none;
+    z-index: 3;
+    overflow: hidden;
+  }
+  .dust-motes span {
+    position: absolute;
+    width: 2px; height: 2px;
+    bottom: -10px;
+    background: rgba(255, 232, 180, 0.75);
+    border-radius: 50%;
+    filter: drop-shadow(0 0 3px rgba(255, 220, 150, 0.85));
+    opacity: 0;
+    animation: dustFloat linear infinite;
+  }
+  @keyframes dustFloat {
+    0%   { transform: translate(0, 0) scale(0.5); opacity: 0; }
+    8%   { opacity: 0.85; transform: translate(4px, -40px) scale(0.9); }
+    25%  { transform: translate(-8px, -120px) scale(1); opacity: 0.9; }
+    50%  { transform: translate(12px, -220px) scale(1); opacity: 0.75; }
+    75%  { transform: translate(-6px, -320px) scale(0.85); opacity: 0.55; }
+    92%  { opacity: 0.2; }
+    100% { transform: translate(0, -400px) scale(0.3); opacity: 0; }
+  }
+  .dust-motes span:nth-child(1)  { left: 6%;  animation-duration: 22s; animation-delay: 0s;  }
+  .dust-motes span:nth-child(2)  { left: 14%; animation-duration: 18s; animation-delay: 3s;  width: 1.5px; height: 1.5px; }
+  .dust-motes span:nth-child(3)  { left: 22%; animation-duration: 26s; animation-delay: 7s;  }
+  .dust-motes span:nth-child(4)  { left: 30%; animation-duration: 20s; animation-delay: 2s;  width: 2.5px; height: 2.5px; }
+  .dust-motes span:nth-child(5)  { left: 38%; animation-duration: 24s; animation-delay: 9s;  }
+  .dust-motes span:nth-child(6)  { left: 46%; animation-duration: 19s; animation-delay: 5s;  width: 1.5px; height: 1.5px; }
+  .dust-motes span:nth-child(7)  { left: 54%; animation-duration: 23s; animation-delay: 11s; }
+  .dust-motes span:nth-child(8)  { left: 62%; animation-duration: 21s; animation-delay: 1s;  width: 2.5px; height: 2.5px; }
+  .dust-motes span:nth-child(9)  { left: 70%; animation-duration: 25s; animation-delay: 6s;  }
+  .dust-motes span:nth-child(10) { left: 78%; animation-duration: 17s; animation-delay: 12s; width: 1.5px; height: 1.5px; }
+  .dust-motes span:nth-child(11) { left: 86%; animation-duration: 22s; animation-delay: 4s;  }
+  .dust-motes span:nth-child(12) { left: 94%; animation-duration: 20s; animation-delay: 8s;  }
+  .dust-motes span:nth-child(13) { left: 10%; animation-duration: 28s; animation-delay: 14s; width: 2.5px; height: 2.5px; }
+  .dust-motes span:nth-child(14) { left: 42%; animation-duration: 27s; animation-delay: 16s; }
+  .dust-motes span:nth-child(15) { left: 82%; animation-duration: 26s; animation-delay: 10s; }
+
+  /* Shooting star — rare celestial event */
+  .shooting-star {
+    position: absolute;
+    top: 60px; left: -80px;
+    width: 80px; height: 2px;
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 230, 0.95) 60%, rgba(255, 200, 120, 0.7) 85%, transparent 100%);
+    border-radius: 2px;
+    filter: blur(0.6px) drop-shadow(0 0 4px rgba(255, 240, 200, 0.8));
+    opacity: 0;
+    z-index: 2;
+    pointer-events: none;
+    animation: shootingStar 14s linear infinite;
+  }
+  @keyframes shootingStar {
+    0%, 82%   { transform: translate(0, 0) rotate(16deg); opacity: 0; }
+    85%       { opacity: 0; }
+    87%       { opacity: 1; }
+    95%       { transform: translate(900px, 220px) rotate(16deg); opacity: 0.75; }
+    98%, 100% { transform: translate(1000px, 260px) rotate(16deg); opacity: 0; }
+  }
+
   /* THE SPHINX — full character in scene */
   .sphinx-character {
     position: absolute;
@@ -482,7 +545,8 @@
     .palm, .palm-right, .sphinx-avatar, body::before, .archway-bg, .sand-dune,
     .sky-aurora, .moon, .light-shaft, .horizon-glow, .distant-pyramids,
     .sphinx-character, .sphinx-eye, .sphinx-eye ellipse,
-    .traveler-character, .lantern-flame, .lantern-glass {
+    .traveler-character, .lantern-flame, .lantern-glass,
+    .dust-motes span, .shooting-star {
       animation: none !important;
     }
   }
@@ -637,7 +701,13 @@
       <div class="sky-aurora"></div>
       <div class="moon"></div>
       <div class="light-shaft"></div>
+      <div class="shooting-star"></div>
       <div class="horizon-glow"></div>
+      <div class="dust-motes">
+        <span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span>
+      </div>
 
       <svg class="distant-mountains" viewBox="0 0 900 90" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
         <!-- Far mountain range -->
