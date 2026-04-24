@@ -449,6 +449,15 @@
       opacity: 1;
     }
   }
+  /* Sphinx judges choice — eyes flare with intensity */
+  .sphinx-character.sphinx-judging .sphinx-eye ellipse {
+    animation: eyeJudging 1.2s ease-in-out forwards;
+  }
+  @keyframes eyeJudging {
+    0%   { filter: drop-shadow(0 0 2px rgba(240, 184, 56, 0.55)); opacity: 0.9; }
+    40%  { filter: drop-shadow(0 0 12px rgba(255, 220, 100, 1)) drop-shadow(0 0 28px rgba(255, 160, 60, 0.9)); opacity: 1; }
+    100% { filter: drop-shadow(0 0 6px rgba(240, 184, 56, 0.75)); opacity: 0.95; }
+  }
   /* THE TRAVELER — the AE as a character */
   .traveler-character {
     position: absolute;
@@ -1909,6 +1918,11 @@ function pickChoice(i) {
   const dustMotes = document.querySelector(".dust-motes");
   dustMotes.classList.add("choice-burst");
   setTimeout(() => dustMotes.classList.remove("choice-burst"), 800);
+
+  // Sphinx intensifies gaze (eyes glow brighter) when judging
+  const sphinxCharacter = document.querySelector(".sphinx-character");
+  sphinxCharacter.classList.add("sphinx-judging");
+  setTimeout(() => sphinxCharacter.classList.remove("sphinx-judging"), 1200);
 
   // apply deltas to the three pillars
   for (const [k, v] of Object.entries(pillarDeltas)) {
