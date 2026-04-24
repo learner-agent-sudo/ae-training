@@ -242,7 +242,57 @@
     98%, 100% { transform: translate(1000px, 260px) rotate(16deg); opacity: 0; }
   }
 
-  /* THE SPHINX — full character in scene */
+  /* SPHINX SPEECH BUBBLE — wisdom scroll positioned at her mouth */
+  .sphinx-speech {
+    position: absolute;
+    top: 18px; right: 48px;
+    width: 340px;
+    background: linear-gradient(135deg, #fffef5 0%, #f8f4e8 100%);
+    border: 2.5px solid #8a6a48;
+    border-radius: 16px;
+    padding: 18px 20px;
+    box-shadow:
+      0 12px 32px rgba(0, 0, 0, 0.38),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+    z-index: 7;
+    pointer-events: auto;
+  }
+  .sphinx-speech::before {
+    content: "";
+    position: absolute;
+    bottom: -14px;
+    left: 35px;
+    width: 0; height: 0;
+    border-left: 12px solid transparent;
+    border-right: 12px solid transparent;
+    border-top: 14px solid #fffef5;
+    filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.25));
+  }
+  .speech-header {
+    font-size: 10px;
+    color: #8a6a48;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .speech-header::before {
+    content: "🔮";
+    font-size: 12px;
+  }
+  .speech-body {
+    font-size: 14px;
+    line-height: 1.62;
+    color: #3a2414;
+    white-space: pre-wrap;
+    font-family: Georgia, serif;
+  }
+
+  /* TRAVELER THOUGHT BUBBLE — positioned at their level, right side */
   .sphinx-character {
     position: absolute;
     right: 24px; bottom: 32px;
@@ -423,6 +473,8 @@
     .sand-dune-back { bottom: 32px; height: 35px; }
     .sphinx-character { width: 170px; height: 220px; right: 10px; bottom: 18px; }
     .traveler-character { width: 115px; height: 175px; left: 8px; bottom: 18px; }
+    .sphinx-speech { width: 240px; top: 10px; right: 20px; padding: 14px 16px; font-size: 13px; }
+    .sphinx-speech::before { bottom: -10px; left: 25px; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 10px solid #fffef5; }
   }
   .wrap { max-width: 900px; margin: 0 auto; padding: 40px 24px 100px; }
   header h1 {
@@ -546,7 +598,7 @@
     .sky-aurora, .moon, .light-shaft, .horizon-glow, .distant-pyramids,
     .sphinx-character, .sphinx-eye, .sphinx-eye ellipse,
     .traveler-character, .lantern-flame, .lantern-glass,
-    .dust-motes span, .shooting-star {
+    .dust-motes span, .shooting-star, .sphinx-speech {
       animation: none !important;
     }
   }
@@ -1133,6 +1185,18 @@
                 stroke="#6e4c18" stroke-width="0.5" opacity="0.7"/>
         </g>
       </svg>
+
+      <!-- Sphinx's speech bubble — wisdom from the guardian -->
+      <div class="sphinx-speech">
+        <div class="speech-header">The Sphinx poses:</div>
+        <div class="speech-body" id="sphinxRiddle">Whose template do we use?
+
+From: priya.s@acme.example
+
+"Hi Jordan — great demo yesterday. To move quickly, please use the attached Acme Master Services Agreement as the starting point. It's what we use with all vendors."
+
+— Priya, Procurement</div>
+      </div>
 
       <div class="sand-dune"></div>
     </div>
