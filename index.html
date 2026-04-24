@@ -221,6 +221,17 @@
   .dust-motes span:nth-child(14) { left: 42%; animation-duration: 27s; animation-delay: 16s; }
   .dust-motes span:nth-child(15) { left: 82%; animation-duration: 26s; animation-delay: 10s; }
 
+  /* Dust burst when choice is made */
+  .dust-motes.choice-burst span {
+    animation: dustBurst cubic-bezier(0.36, 0, 0.66, -0.56) 0.8s both !important;
+  }
+  @keyframes dustBurst {
+    0%   { transform: translate(0, -20px) scale(0.4); opacity: 0; }
+    15%  { opacity: 1; transform: translate(var(--burst-x, 0), -60px) scale(1.1); }
+    50%  { opacity: 0.8; transform: translate(var(--burst-x, 0), -140px) scale(0.95); }
+    100% { opacity: 0; transform: translate(var(--burst-x, 0), -200px) scale(0.5); }
+  }
+
   /* Shooting star — rare celestial event */
   .shooting-star {
     position: absolute;
@@ -675,7 +686,7 @@
     .sky-aurora, .moon, .light-shaft, .horizon-glow, .distant-pyramids,
     .sphinx-character, .sphinx-eye, .sphinx-eye ellipse,
     .traveler-character, .lantern-flame, .lantern-glass,
-    .dust-motes span, .shooting-star, .sphinx-speech, .speech-body,
+    .dust-motes span, .dust-motes.choice-burst span, .shooting-star, .sphinx-speech, .speech-body,
     .choice-label, .choice-bubble {
       animation: none !important;
     }
@@ -1893,6 +1904,11 @@ function pickChoice(i) {
   const step = currentScenario().steps[state.stepIndex];
   const choice = step.choices[i];
   const pillarDeltas = mapDeltasToPillars(choice.deltas);
+
+  // Trigger dust burst animation for visual feedback
+  const dustMotes = document.querySelector(".dust-motes");
+  dustMotes.classList.add("choice-burst");
+  setTimeout(() => dustMotes.classList.remove("choice-burst"), 800);
 
   // apply deltas to the three pillars
   for (const [k, v] of Object.entries(pillarDeltas)) {
