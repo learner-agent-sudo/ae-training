@@ -1924,8 +1924,14 @@ function updateCinematicScene() {
   const exitBtn = document.getElementById("cinematicExitBtn");
   if (exitBtn) exitBtn.onclick = goHome;
 
-  // Populate speech bubbles from current step
+  // Populate speech bubbles from current step, restart entrance animations
   const step = currentScenario().steps[state.stepIndex];
+  const sphinxSpeechEl = document.querySelector(".sphinx-speech");
+  if (sphinxSpeechEl) {
+    sphinxSpeechEl.style.animation = "none";
+    sphinxSpeechEl.offsetHeight;
+    sphinxSpeechEl.style.animation = "";
+  }
   document.getElementById("sphinxRiddle").textContent = step.body;
 
   step.choices.forEach((choice, i) => {
@@ -1937,6 +1943,10 @@ function updateCinematicScene() {
       bubble.style.opacity = "";
       bubble.style.borderColor = "";
       bubble.style.background = "";
+      // Restart entrance animation for each new riddle
+      bubble.style.animation = "none";
+      bubble.offsetHeight; // force reflow
+      bubble.style.animation = "";
       bubble.onclick = (e) => { e.stopPropagation(); pickChoice(i); };
     }
   });
