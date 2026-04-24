@@ -67,6 +67,99 @@
         #5a2a1a 100%);
     box-shadow: inset 0 -40px 80px rgba(80, 30, 10, 0.4), inset 0 0 120px rgba(0, 0, 0, 0.5);
   }
+  /* Full-screen cinematic mode — triggered when playing a riddle */
+  .oasis-scene.cinematic-active {
+    position: fixed;
+    inset: 0;
+    height: 100vh;
+    width: 100vw;
+    margin: 0;
+    border-radius: 0;
+    z-index: 200;
+    overflow: hidden;
+  }
+  body.cinematic-lock { overflow: hidden; }
+  /* Floating pillar HUD — top-center strip */
+  .cinematic-hud {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9;
+    display: flex;
+    gap: 12px;
+    background: rgba(8, 6, 22, 0.72);
+    border: 1px solid rgba(212, 168, 83, 0.22);
+    border-radius: 12px;
+    padding: 8px 18px;
+    backdrop-filter: blur(12px);
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  .hud-meter {
+    display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 70px;
+  }
+  .hud-label { font-size: 9px; color: rgba(212,168,83,0.85); text-transform: uppercase; letter-spacing: 0.08em; }
+  .hud-value { font-size: 11px; color: var(--ink); font-weight: 700; }
+  .hud-bar { width: 100%; height: 5px; background: rgba(255,255,255,0.1); border-radius: 999px; overflow: hidden; }
+  .hud-bar-fill { height: 100%; border-radius: 999px; transition: width 0.35s ease; }
+  /* Sphinx judgment panel — slides up from bottom */
+  .cinematic-coach {
+    position: absolute;
+    bottom: 64px;
+    left: 50%;
+    transform: translateX(-50%) translateY(0);
+    width: min(90%, 620px);
+    background: rgba(8, 6, 20, 0.85);
+    border: 1px solid rgba(212, 168, 83, 0.32);
+    border-left: 3px solid var(--gold);
+    border-radius: 12px;
+    padding: 14px 18px;
+    z-index: 9;
+    color: #d7daf5;
+    font-size: 14px;
+    line-height: 1.6;
+    backdrop-filter: blur(12px);
+    display: none;
+  }
+  .cinematic-coach.visible {
+    display: block;
+    animation: coachSlideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes coachSlideUp {
+    from { opacity: 0; transform: translateX(-50%) translateY(18px); }
+    to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+  }
+  .cinematic-coach h4 {
+    font-size: 10px; color: var(--gold); text-transform: uppercase;
+    letter-spacing: 0.1em; font-weight: 600; margin: 0 0 8px;
+  }
+  .cinematic-coach .deltas {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; font-size: 11px;
+  }
+  /* Bottom-right action controls */
+  .cinematic-controls {
+    position: absolute;
+    bottom: 16px;
+    right: 20px;
+    z-index: 9;
+    display: flex;
+    gap: 10px;
+    pointer-events: auto;
+  }
+  /* Top-left back button */
+  .cinematic-exit-btn {
+    position: absolute;
+    top: 12px; left: 16px;
+    z-index: 9;
+    background: rgba(8, 6, 22, 0.65);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: var(--muted); padding: 6px 12px;
+    border-radius: 8px; font-size: 13px; cursor: pointer;
+    backdrop-filter: blur(8px);
+    pointer-events: auto;
+  }
+  .cinematic-exit-btn:hover { color: var(--ink); border-color: rgba(255,255,255,0.3); }
   /* Sky aurora / nebula layer */
   .sky-aurora {
     position: absolute; inset: 0; pointer-events: none;
@@ -847,7 +940,7 @@
 </head>
 <body>
   <div class="wrap">
-    <div class="oasis-scene" aria-hidden="true">
+    <div class="oasis-scene" aria-hidden="true" style="display:none">
       <div class="sky-aurora"></div>
       <div class="moon"></div>
       <div class="light-shaft"></div>
@@ -1305,6 +1398,12 @@ From: priya.s@acme.example
       </div>
 
       <div class="sand-dune"></div>
+
+      <!-- Cinematic overlay UI — only visible in full-screen mode -->
+      <div class="cinematic-hud" id="cinematicHud"></div>
+      <div class="cinematic-coach" id="cinematicCoach"></div>
+      <div class="cinematic-controls" id="cinematicControls"></div>
+      <button class="cinematic-exit-btn" id="cinematicExitBtn">← Oases</button>
     </div>
 
     <header id="appHeader"></header>
@@ -1797,104 +1896,118 @@ function renderPillars() {
   }).join("");
 }
 
+function leaveCinematicMode() {
+  const scene = document.querySelector(".oasis-scene");
+  scene.classList.remove("cinematic-active");
+  scene.style.display = "none";
+  document.body.classList.remove("cinematic-lock");
+  const coach = document.getElementById("cinematicCoach");
+  if (coach) { coach.classList.remove("visible"); coach.innerHTML = ""; }
+  const controls = document.getElementById("cinematicControls");
+  if (controls) controls.innerHTML = "";
+}
+
 function updateCinematicScene() {
-  if (!state.scenarioId || state.stepIndex === 0 && !state.introShown) {
-    // Hide scene during intro
-    document.querySelector(".oasis-scene").style.display = "none";
+  const scene = document.querySelector(".oasis-scene");
+
+  // Hide scene on home screen or intro card
+  if (!state.scenarioId || !state.introShown) {
+    leaveCinematicMode();
     return;
   }
-  document.querySelector(".oasis-scene").style.display = "";
 
-  const scenario = currentScenario();
-  const step = scenario.steps[state.stepIndex];
-  const sphinxSpeech = document.querySelector(".sphinx-speech");
-  const travelChoices = document.querySelector(".traveler-choices");
+  // Activate full-screen cinematic mode
+  scene.style.display = "";
+  scene.classList.add("cinematic-active");
+  document.body.classList.add("cinematic-lock");
 
-  // Update Sphinx's speech with current riddle
+  const exitBtn = document.getElementById("cinematicExitBtn");
+  if (exitBtn) exitBtn.onclick = goHome;
+
+  // Populate speech bubbles from current step
+  const step = currentScenario().steps[state.stepIndex];
   document.getElementById("sphinxRiddle").textContent = step.body;
 
-  // Update Traveler's choices
   step.choices.forEach((choice, i) => {
     const bubble = document.getElementById(`choice${i}`);
     if (bubble) {
       bubble.textContent = choice.label;
-      // Make choice bubbles interactive
       bubble.style.cursor = "pointer";
       bubble.style.pointerEvents = "auto";
-      bubble.onclick = (e) => {
-        e.stopPropagation();
-        pickChoice(i);
-      };
+      bubble.style.opacity = "";
+      bubble.style.borderColor = "";
+      bubble.style.background = "";
+      bubble.onclick = (e) => { e.stopPropagation(); pickChoice(i); };
     }
   });
+
+  // Clear coach feedback for new riddle
+  const coach = document.getElementById("cinematicCoach");
+  if (coach) { coach.classList.remove("visible"); coach.innerHTML = ""; }
+  const controls = document.getElementById("cinematicControls");
+  if (controls) controls.innerHTML = "";
+
+  renderCinematicHud();
+}
+
+function renderCinematicHud() {
+  const hud = document.getElementById("cinematicHud");
+  if (!hud) return;
+  const colors = { passage: "#f0a500", trust: "#a78bfa", integrity: "#4ade80" };
+  hud.innerHTML = Object.entries(PILLARS).map(([key, def]) => {
+    const val = clamp(state.pillars[key]);
+    return `
+      <div class="hud-meter">
+        <div class="hud-label">${def.icon} ${def.label}</div>
+        <div class="hud-bar"><div class="hud-bar-fill" style="width:${val}%;background:${colors[def.barClass]||'var(--accent)'}"></div></div>
+        <div class="hud-value">${val}</div>
+      </div>`;
+  }).join("");
 }
 
 function renderStep() {
   if (state.finished) return renderEnd();
   const scenario = currentScenario();
 
+  if (state.introShown) {
+    // Cinematic mode — oasis is full-screen; hide the normal layout
+    $pillars.style.display = "none";
+    $header.innerHTML = "";
+    $stage.innerHTML = "";
+    updateCinematicScene();
+    return;
+  }
+
+  // Intro card — normal layout, no oasis scene
   $pillars.style.display = "";
   $header.innerHTML = `
     <h1>🏜️ The Gatekeeper of the Oasis</h1>
     <p>${scenario.title}</p>`;
   renderPillars();
-  updateCinematicScene();
+  updateCinematicScene(); // hides scene since !introShown
 
-  if (state.stepIndex === 0 && !state.introShown) {
-    // Intro card — you approach the oasis
-    $stage.innerHTML = `
-      <div class="card">
-        <div class="sphinx-speaks">
-          <div class="sphinx-avatar">${SPHINX.avatar}</div>
-          <div class="sphinx-label">
-            <div class="sphinx-name">${SPHINX.name}</div>
-            <div class="sphinx-title">${SPHINX.title}</div>
-          </div>
-        </div>
-        <span class="tag">You approach the oasis</span>
-        <h2 class="scene-title">${scenario.title}</h2>
-        <div class="scene-body">${scenario.intro.replace(/\n/g,"<br/>")}</div>
-        <div class="controls">
-          <button class="ghost" id="backHomeBtn">← Back to the oases</button>
-          <button class="primary" id="startBtn">Face the Sphinx →</button>
-        </div>
-      </div>`;
-    document.getElementById("startBtn").onclick = () => {
-      state.introShown = true;
-      renderStep();
-    };
-    document.getElementById("backHomeBtn").onclick = goHome;
-    return;
-  }
-
-  const step = scenario.steps[state.stepIndex];
-  const riddleNum = state.stepIndex + 1;
-  const totalRiddles = scenario.steps.length;
   $stage.innerHTML = `
     <div class="card">
       <div class="sphinx-speaks">
         <div class="sphinx-avatar">${SPHINX.avatar}</div>
         <div class="sphinx-label">
           <div class="sphinx-name">${SPHINX.name}</div>
-          <div class="sphinx-title">poses riddle ${riddleNum} of ${totalRiddles}</div>
+          <div class="sphinx-title">${SPHINX.title}</div>
         </div>
       </div>
-      <span class="tag">${step.tag}</span>
-      <h2 class="scene-title">${step.title}</h2>
-      <div class="scene-body">${step.body.replace(/\n/g,"<br/>")}</div>
-      <div class="choices" id="choices"></div>
-      <div id="coachSlot"></div>
-      <div class="controls" id="controls"></div>
+      <span class="tag">You approach the oasis</span>
+      <h2 class="scene-title">${scenario.title}</h2>
+      <div class="scene-body">${scenario.intro.replace(/\n/g,"<br/>")}</div>
+      <div class="controls">
+        <button class="ghost" id="backHomeBtn">← Back to the oases</button>
+        <button class="primary" id="startBtn">Face the Sphinx →</button>
+      </div>
     </div>`;
-
-  const $choices = document.getElementById("choices");
-  step.choices.forEach((c, i) => {
-    const btn = document.createElement("button");
-    btn.className = "choice";
-    btn.textContent = c.label;
-    btn.onclick = () => pickChoice(i);
-    $choices.appendChild(btn);
-  });
+  document.getElementById("startBtn").onclick = () => {
+    state.introShown = true;
+    renderStep();
+  };
+  document.getElementById("backHomeBtn").onclick = goHome;
 }
 
 // Map legacy scenario deltas to the three pillars.
@@ -1930,15 +2043,10 @@ function pickChoice(i) {
   }
   renderPillars();
 
-  // disable choice buttons
-  document.querySelectorAll(".choice").forEach(b => {
-    b.disabled = true;
-    b.style.opacity = 0.55;
-    b.style.cursor = "default";
-  });
-  // highlight chosen
-  document.querySelectorAll(".choice")[i].style.borderColor = "var(--gold)";
-  document.querySelectorAll(".choice")[i].style.opacity = 1;
+  // disable card-layer choice buttons (only exist in non-cinematic fallback)
+  const cardChoices = document.querySelectorAll(".choice");
+  cardChoices.forEach(b => { b.disabled = true; b.style.opacity = 0.55; b.style.cursor = "default"; });
+  if (cardChoices[i]) { cardChoices[i].style.borderColor = "var(--gold)"; cardChoices[i].style.opacity = 1; }
 
   // disable cinematic choice bubbles
   document.querySelectorAll(".choice-bubble").forEach((b, idx) => {
@@ -1951,7 +2059,10 @@ function pickChoice(i) {
     }
   });
 
-  // show Sphinx's judgment
+  // Update HUD pillars
+  renderCinematicHud();
+
+  // Show Sphinx's judgment in cinematic coach panel
   const deltasHtml = Object.entries(pillarDeltas).map(([k,v]) => {
     const def = PILLARS[k];
     if (v === 0) return `<span class="delta neu">${def.icon} ${def.label}: 0</span>`;
@@ -1960,17 +2071,18 @@ function pickChoice(i) {
     return `<span class="delta ${cls}">${def.icon} ${def.label}: ${sign}${v}</span>`;
   }).join("");
 
-  document.getElementById("coachSlot").innerHTML = `
-    <div class="coach">
-      <h4>The Sphinx Judges</h4>
-      <div>${choice.coach}</div>
-      <div class="deltas">${deltasHtml}</div>
-    </div>`;
+  const coach = document.getElementById("cinematicCoach");
+  if (coach) {
+    coach.innerHTML = `<h4>The Sphinx Judges</h4><div>${choice.coach}</div><div class="deltas">${deltasHtml}</div>`;
+    coach.classList.add("visible");
+  }
 
   const nextLabel = state.stepIndex === currentScenario().steps.length - 1 ? "Face the Sphinx's verdict →" : "Next riddle →";
-  document.getElementById("controls").innerHTML =
-    `<span></span><button class="primary" id="nextBtn">${nextLabel}</button>`;
-  document.getElementById("nextBtn").onclick = advance;
+  const controls = document.getElementById("cinematicControls");
+  if (controls) {
+    controls.innerHTML = `<button class="primary" id="nextBtn">${nextLabel}</button>`;
+    document.getElementById("nextBtn").onclick = advance;
+  }
 }
 
 function advance() {
@@ -2040,6 +2152,7 @@ function computeUnlockedScrolls(scenarioId, pillars) {
 }
 
 function renderEnd() {
+  leaveCinematicMode();
   const g = grade();
   const scenario = currentScenario();
   saveBestScore(scenario.id, g.score, g.level);
@@ -2103,11 +2216,10 @@ function startScenario(id) {
   state.introShown = false;
   state.pillars = Object.fromEntries(Object.entries(PILLARS).map(([k,v]) => [k, v.start]));
   render();
-  // Trigger scene reveal animations
-  setTimeout(() => updateCinematicScene(), 50);
 }
 
 function goHome() {
+  leaveCinematicMode();
   state.screen = "home";
   state.scenarioId = null;
   state.finished = false;
@@ -2121,6 +2233,7 @@ function render() {
 }
 
 function renderHome() {
+  leaveCinematicMode();
   $pillars.style.display = "none";
   $header.innerHTML = `
     <h1>🏜️ The Gatekeeper of the Oasis</h1>
