@@ -257,6 +257,21 @@
       inset 0 -1px 0 rgba(0, 0, 0, 0.1);
     z-index: 7;
     pointer-events: auto;
+    animation: sphinxSpeak 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes sphinxSpeak {
+    from { opacity: 0; transform: translateY(-12px) scale(0.95); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .choice-bubble {
+    animation: choiceReveal 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+  }
+  .choice-bubble:nth-child(1) { animation-delay: 0.4s; }
+  .choice-bubble:nth-child(2) { animation-delay: 0.55s; }
+  .choice-bubble:nth-child(3) { animation-delay: 0.7s; }
+  @keyframes choiceReveal {
+    from { opacity: 0; transform: translateY(-10px) scale(0.92); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
   }
   .sphinx-speech::before {
     content: "";
