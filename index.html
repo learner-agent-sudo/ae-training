@@ -1776,6 +1776,29 @@ function renderPillars() {
   }).join("");
 }
 
+function updateCinematicScene() {
+  if (!state.scenarioId || state.stepIndex === 0 && !state.introShown) {
+    // Hide scene during intro
+    document.querySelector(".oasis-scene").style.display = "none";
+    return;
+  }
+  document.querySelector(".oasis-scene").style.display = "";
+
+  const scenario = currentScenario();
+  const step = scenario.steps[state.stepIndex];
+  const sphinxSpeech = document.querySelector(".sphinx-speech");
+  const travelChoices = document.querySelector(".traveler-choices");
+
+  // Update Sphinx's speech with current riddle
+  document.getElementById("sphinxRiddle").textContent = step.body;
+
+  // Update Traveler's choices
+  step.choices.forEach((choice, i) => {
+    const bubble = document.getElementById(`choice${i}`);
+    if (bubble) bubble.textContent = choice.label;
+  });
+}
+
 function renderStep() {
   if (state.finished) return renderEnd();
   const scenario = currentScenario();
@@ -1785,6 +1808,7 @@ function renderStep() {
     <h1>🏜️ The Gatekeeper of the Oasis</h1>
     <p>${scenario.title}</p>`;
   renderPillars();
+  updateCinematicScene();
 
   if (state.stepIndex === 0 && !state.introShown) {
     // Intro card — you approach the oasis
@@ -2028,6 +2052,8 @@ function startScenario(id) {
   state.introShown = false;
   state.pillars = Object.fromEntries(Object.entries(PILLARS).map(([k,v]) => [k, v.start]));
   render();
+  // Trigger scene reveal animations
+  setTimeout(() => updateCinematicScene(), 50);
 }
 
 function goHome() {
