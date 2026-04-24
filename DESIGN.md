@@ -314,12 +314,112 @@ index.html
 
 ---
 
+---
+
+## Phase 3D: Cinematic Character Dialogue (Blizzard-Tier Animation)
+
+### Vision
+Transform the static scene into a **living cinematic experience** where the Sphinx and Traveler (AE) are full 2D characters who **speak to each other** via parchment speech bubbles positioned at their mouths.
+
+### Implementation
+**All changes bundled in index.html** (CSS + SVG + JavaScript)
+
+#### Characters
+- **The Sphinx** (260×340px): Full illustrated form with face, eyes (animated glow), ceremonial beard, nemes headdress
+  - Eyes animate with inner fire (glow pulse + blink cycle)
+  - Body breathes with subtle float animation
+  - On card hover: eyes intensify, breath quickens
+  
+- **The Traveler** (180×270px): AE character with lantern
+  - Lantern flame flickers (multi-axis wobble + opacity variation)
+  - Lantern glass pulses with glow aura
+  - On card hover: lantern intensifies (brighter glow, faster flicker)
+  - Body idle bob (2-3px vertical drift every 4.8s)
+
+#### Speech Bubbles (Parchment Style)
+- **Sphinx Speech**: Positioned top-right at mouth level (340×90px)
+  - Background: Parchment gradient (#fffef5 → #f8f4e8)
+  - Border: Leather brown (#8a6a48)
+  - Pointer tail: 14px drop shadow, positioned below
+  - Header: "🔮 The Sphinx poses:" (gold color)
+  - Body: Current riddle text from SCENARIOS
+  
+- **Traveler Choices**: Positioned left side, staggered vertically
+  - Choice label: "💭 Your move:"
+  - Three choice bubbles (one per answer option)
+  - Same parchment styling, slightly smaller
+  - Hover: brightens + lifts (-2px Y)
+
+#### Animation Sequence
+**Upon riddle display:**
+1. **0.0s**: Scene idle (dust particles float continuously)
+2. **0.0s**: Sphinx speech bubble slides in from top-left + bounces (0.7s easeOutBack)
+3. **0.1s**: Speech body text fades in (0.9s ease-out)
+4. **0.35s**: Choice label slides up + fades in (0.6s ease-out, 0.35s delay)
+5. **0.4s–0.7s**: Choice bubbles stagger-bounce in (easeOutElastic):
+   - Choice 0: 0.4s delay + 0.6s duration
+   - Choice 1: 0.55s delay + 0.6s duration
+   - Choice 2: 0.7s delay + 0.6s duration
+
+**Upon choice selection:**
+6. **0.0s**: Particle burst effect (dust particles accelerate upward for 0.8s)
+7. **0.0s**: Selected choice bubble glows gold border + stays full opacity
+8. **0.0s**: Unselected choices fade to 0.55 opacity + disabled
+9. **0.5s+**: Coach feedback renders (Sphinx judges the choice)
+10. **1.0s+**: "Next riddle" button appears
+
+#### Depth Layering (Z-Index)
+```
+z-index 1:  Sky aurora + moonlight shaft (ethereal glow)
+z-index 2:  Distant mountains + pyramids (mirage shimmer)
+z-index 3:  Dust particle system (foreground float)
+z-index 4:  Palm trees + archway (mid-ground)
+z-index 5:  Sand dune (foreground)
+z-index 6:  Sphinx & Traveler characters (main focus)
+z-index 6:  Choice bubbles (interactable overlays)
+z-index 7:  Sphinx speech bubble (topmost speech)
+```
+
+#### CSS Animations Added
+```css
+@keyframes sphinxSpeak          /* 0.7s easeOutBack */
+@keyframes textReveal           /* 0.9s ease-out */
+@keyframes labelReveal          /* 0.6s ease-out, 0.35s delay */
+@keyframes choiceReveal         /* 0.6s easeOutElastic, staggered 0.4/0.55/0.7s */
+@keyframes dustBurst            /* 0.8s choice feedback, accelerate upward */
+@keyframes sphinxCharBreathe    /* idle 5s float */
+@keyframes eyeGlow              /* 4.2s inner fire pulse */
+@keyframes eyeBlink             /* 6.5s + on-hover intensify to 3.8s */
+@keyframes flameFlicker         /* 0.55s lantern wobble */
+@keyframes lanternPulse         /* 2.4s glow aura */
+```
+
+#### JavaScript Wiring
+- `updateCinematicScene()`: Populates speech bubbles from current SCENARIOS step
+- `pickChoice(i)`: Triggers dust burst, disables unselected choices, highlights selection
+- Animations synchronized with game state (hidden during intro, active on first riddle)
+- Accessibility: `prefers-reduced-motion` disables all animations
+
+#### Mobile Responsive
+- Scene height: 260px (down from 400px)
+- Characters scale: Sphinx 170×220, Traveler 115×175
+- Speech bubble widths: 240px (down from 340px)
+- Choice bubbles: 220px container
+- Animations remain same (mobile-first easing curves)
+
+### Quality Standards (Blizzard-Tier)
+✓ **Character presence**: Full SVG-rendered faces with gradient lighting and shadow depth  
+✓ **Cinematic timing**: Staggered reveals create rhythm (Sphinx → label → choices)  
+✓ **Visual weight**: Multiple overlapping animations (character breathe + eyes glow + particles + speech)  
+✓ **Easing mastery**: Mix of linear, ease-in-out, cubic-bezier, easeOutBack, easeOutElastic  
+✓ **Accessibility**: All animations respect `prefers-reduced-motion` and have fallbacks  
+✓ **Performance**: GPU-accelerated transforms (translate, scale), optimized filter effects  
+
+---
+
 ## Next Steps
 
-✅ **Three Pillars Framework Ready**
-→ **Phase 1**: Refactor quiz → Sphinx riddle dialogue (Sonnet 4.6, ~1000 tokens)
-   - Three pillars display (top-right, always visible)
-   - Sphinx asks riddles from your scenarios
-   - Each answer shifts the pillars
-
-Ready for Phase 1?
+✅ **Phase 3D: Cinematic Character Dialogue Complete**
+→ **Phase 3E**: Visual juice (particle bursts ✓, pillar bar fill animations)
+→ **Phase 3G**: Epic verdict screen (Sphinx's final judgment cinematics)
+→ **Phase 3H**: Audio layer (future: Sphinx speaks, scroll unlocks, choice feedback)
