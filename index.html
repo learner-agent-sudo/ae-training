@@ -82,42 +82,45 @@
   /* Floating pillar HUD — top-center strip */
   .cinematic-hud {
     position: absolute;
-    top: 12px;
+    top: clamp(8px, 1.4vh, 20px);
     left: 50%;
     transform: translateX(-50%);
     z-index: 9;
     display: flex;
-    gap: 12px;
+    gap: clamp(6px, 0.9vw, 16px);
     background: rgba(8, 6, 22, 0.72);
     border: 1px solid rgba(212, 168, 83, 0.22);
     border-radius: 12px;
-    padding: 8px 18px;
+    padding: clamp(6px, 0.7vw, 10px) clamp(12px, 1.6vw, 22px);
     backdrop-filter: blur(12px);
     pointer-events: none;
     white-space: nowrap;
+    max-width: calc(100vw - 24px);
   }
   .hud-meter {
-    display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 70px;
+    display: flex; flex-direction: column; align-items: center;
+    gap: clamp(2px, 0.3vw, 4px);
+    min-width: clamp(58px, 7vw, 90px);
   }
-  .hud-label { font-size: 9px; color: rgba(212,168,83,0.85); text-transform: uppercase; letter-spacing: 0.08em; }
-  .hud-value { font-size: 11px; color: var(--ink); font-weight: 700; }
-  .hud-bar { width: 100%; height: 5px; background: rgba(255,255,255,0.1); border-radius: 999px; overflow: hidden; }
+  .hud-label { font-size: clamp(8px, 0.2vw + 7px, 10px); color: rgba(212,168,83,0.85); text-transform: uppercase; letter-spacing: 0.08em; }
+  .hud-value { font-size: clamp(10px, 0.25vw + 8px, 13px); color: var(--ink); font-weight: 700; }
+  .hud-bar { width: 100%; height: clamp(4px, 0.45vw, 7px); background: rgba(255,255,255,0.1); border-radius: 999px; overflow: hidden; }
   .hud-bar-fill { height: 100%; border-radius: 999px; transition: width 0.35s ease; }
   /* Sphinx judgment panel — slides up from bottom */
   .cinematic-coach {
     position: absolute;
-    bottom: 64px;
+    bottom: clamp(56px, 8vh, 100px);
     left: 50%;
     transform: translateX(-50%) translateY(0);
-    width: min(90%, 620px);
+    width: min(95%, clamp(280px, 70vw, 700px));
     background: rgba(8, 6, 20, 0.85);
     border: 1px solid rgba(212, 168, 83, 0.32);
     border-left: 3px solid var(--gold);
     border-radius: 12px;
-    padding: 14px 18px;
+    padding: clamp(12px, 1.4vw, 16px) clamp(14px, 1.6vw, 20px);
     z-index: 9;
     color: #d7daf5;
-    font-size: 14px;
+    font-size: clamp(12px, 0.4vw + 10px, 15px);
     line-height: 1.6;
     backdrop-filter: blur(12px);
     display: none;
@@ -131,8 +134,8 @@
     to   { opacity: 1; transform: translateX(-50%) translateY(0); }
   }
   .cinematic-coach h4 {
-    font-size: 10px; color: var(--gold); text-transform: uppercase;
-    letter-spacing: 0.1em; font-weight: 600; margin: 0 0 8px;
+    font-size: clamp(9px, 0.2vw + 8px, 11px); color: var(--gold); text-transform: uppercase;
+    letter-spacing: 0.1em; font-weight: 600; margin: 0 0 clamp(6px, 0.7vw, 8px);
   }
   .cinematic-coach .deltas {
     display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; font-size: 11px;
@@ -154,8 +157,8 @@
     z-index: 9;
     background: rgba(8, 6, 22, 0.65);
     border: 1px solid rgba(255,255,255,0.15);
-    color: var(--muted); padding: 6px 12px;
-    border-radius: 8px; font-size: 13px; cursor: pointer;
+    color: var(--muted); padding: clamp(5px, 0.5vw, 7px) clamp(10px, 1.2vw, 14px);
+    border-radius: 8px; font-size: clamp(12px, 0.3vw + 11px, 14px); cursor: pointer;
     backdrop-filter: blur(8px);
     pointer-events: auto;
   }
@@ -349,12 +352,14 @@
   /* SPHINX SPEECH BUBBLE — wisdom scroll positioned at her mouth */
   .sphinx-speech {
     position: absolute;
-    top: 18px; right: 48px;
-    width: 340px;
+    top: clamp(10px, 2vh, 26px);
+    right: clamp(18px, 5vw, 70px);
+    width: clamp(200px, 34vw, 440px);
+    max-width: calc(100vw - clamp(24px, 10vw, 140px));
     background: linear-gradient(135deg, #fffef5 0%, #f8f4e8 100%);
     border: 2.5px solid #8a6a48;
     border-radius: 16px;
-    padding: 18px 20px;
+    padding: clamp(12px, 1.4vw, 20px) clamp(14px, 1.7vw, 24px);
     box-shadow:
       0 12px 32px rgba(0, 0, 0, 0.38),
       inset 0 1px 0 rgba(255, 255, 255, 0.9),
@@ -380,20 +385,20 @@
   .sphinx-speech::before {
     content: "";
     position: absolute;
-    bottom: -14px;
-    left: 35px;
+    bottom: clamp(-16px, -1.2vw, -10px);
+    left: clamp(20px, 3vw, 42px);
     width: 0; height: 0;
-    border-left: 12px solid transparent;
-    border-right: 12px solid transparent;
-    border-top: 14px solid #fffef5;
+    border-left: clamp(8px, 1vw, 14px) solid transparent;
+    border-right: clamp(8px, 1vw, 14px) solid transparent;
+    border-top: clamp(10px, 1.2vw, 16px) solid #fffef5;
     filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.25));
   }
   .speech-header {
-    font-size: 10px;
+    font-size: clamp(9px, 0.3vw + 8px, 12px);
     color: #8a6a48;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    margin-bottom: 8px;
+    margin-bottom: clamp(6px, 0.6vw, 10px);
     font-weight: 700;
     display: flex;
     align-items: center;
@@ -404,8 +409,8 @@
     font-size: 12px;
   }
   .speech-body {
-    font-size: 14px;
-    line-height: 1.62;
+    font-size: clamp(11px, 0.6vw + 8px, 16px);
+    line-height: 1.55;
     color: #3a2414;
     white-space: pre-wrap;
     font-family: Georgia, serif;
@@ -419,18 +424,19 @@
   /* TRAVELER ANSWER CHOICES — thought bubbles showing options */
   .traveler-choices {
     position: absolute;
-    left: 18px;
-    top: 160px;
-    width: 300px;
+    left: clamp(6px, 3vw, 60px);
+    top: clamp(110px, 20vh, 200px);
+    width: clamp(200px, 30vw, 360px);
+    max-width: calc(100vw - clamp(20px, 8vw, 120px));
     z-index: 6;
     pointer-events: auto;
   }
   .choice-label {
-    font-size: 10px;
+    font-size: clamp(8px, 0.25vw + 7px, 11px);
     color: #c49468;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    margin-bottom: 10px;
+    margin-bottom: clamp(7px, 0.8vw, 12px);
     font-weight: 700;
     padding-left: 6px;
     display: flex;
@@ -450,10 +456,10 @@
     background: linear-gradient(135deg, #f5ebe0 0%, #ede3d0 100%);
     border: 1.5px solid #c49468;
     border-radius: 12px;
-    padding: 12px 14px;
-    margin-bottom: 9px;
-    font-size: 13px;
-    line-height: 1.5;
+    padding: clamp(9px, 1vw, 14px) clamp(11px, 1.2vw, 18px);
+    margin-bottom: clamp(7px, 0.7vw, 11px);
+    font-size: clamp(11px, 0.4vw + 8px, 14px);
+    line-height: 1.45;
     color: #3a2414;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -474,8 +480,10 @@
   /* TRAVELER THOUGHT BUBBLE — positioned at their level, right side */
   .sphinx-character {
     position: absolute;
-    right: 24px; bottom: 32px;
-    width: 260px; height: 340px;
+    right: clamp(6px, 4vw, 90px);
+    bottom: clamp(14px, 2.5vh, 45px);
+    width: clamp(140px, 24vw, 340px);
+    height: clamp(190px, 32vw, 440px);
     z-index: 6;
     transform-origin: center bottom;
     animation: sphinxCharBreathe 5s ease-in-out infinite;
@@ -554,8 +562,10 @@
   /* THE TRAVELER — the AE as a character */
   .traveler-character {
     position: absolute;
-    left: 28px; bottom: 30px;
-    width: 180px; height: 270px;
+    left: clamp(6px, 4vw, 90px);
+    bottom: clamp(14px, 2.5vh, 45px);
+    width: clamp(100px, 18vw, 250px);
+    height: clamp(155px, 26vw, 360px);
     z-index: 6;
     transform-origin: center bottom;
     animation: travelerIdle 4.8s ease-in-out infinite;
@@ -650,86 +660,8 @@
     75%      { background: linear-gradient(180deg, transparent, rgba(195, 150, 75, 0.27) 60%, rgba(165, 120, 55, 0.40)); }
   }
   @media (max-width: 600px) {
-    /* MOBILE: Small characters at edges, reduced text, closer layout */
-    .oasis-scene { height: 260px; margin: 0 -12px 16px; border-radius: 12px; }
-    .palm { width: 70px; height: 95px; bottom: 14px; }
-    .palm-left { left: 8px; }
-    .palm-right { right: 8px; }
-    .archway-bg { width: 200px; height: 100px; bottom: 35px; }
-    .moon { width: 44px; height: 44px; top: 28px; right: 50px; }
-    .light-shaft { width: 90px; height: 220px; top: 50px; right: 30px; }
-    .sand-dune { height: 50px; }
-    .sand-dune-back { bottom: 32px; height: 35px; }
-
-    /* Mobile: Characters smaller, edges */
-    .sphinx-character { width: 140px; height: 200px; right: 6px; bottom: 15px; }
-    .traveler-character { width: 100px; height: 155px; left: 6px; bottom: 15px; }
-
-    /* Mobile: Speech bubbles compact, avoid overlap */
-    .sphinx-speech { width: 220px; top: 12px; right: 18px; padding: 12px 14px; font-size: 12px; }
-    .speech-body { font-size: 11px; line-height: 1.5; }
-    .speech-header { font-size: 9px; }
-    .sphinx-speech::before { bottom: -8px; left: 20px; border-left: 7px solid transparent; border-right: 7px solid transparent; border-top: 8px solid #fffef5; }
-
-    /* Mobile: Choice bubbles smaller */
-    .traveler-choices { width: 200px; left: 6px; top: 120px; }
-    .choice-bubble { padding: 9px 11px; font-size: 11px; line-height: 1.4; }
-    .choice-label { font-size: 8px; margin-bottom: 8px; }
-
-    /* Mobile: HUD more compact */
-    .cinematic-hud { gap: 6px; padding: 6px 12px; }
-    .hud-meter { min-width: 60px; gap: 2px; }
-    .hud-label { font-size: 8px; }
-    .hud-value { font-size: 10px; }
-    .hud-bar { height: 4px; }
-
-    /* Mobile: Coach panel adjusted */
-    .cinematic-coach { bottom: 56px; width: min(95%, 280px); padding: 12px 14px; font-size: 12px; }
-    .cinematic-coach h4 { font-size: 9px; margin-bottom: 6px; }
-
-    /* Mobile: Exit button smaller */
-    .cinematic-exit-btn { padding: 5px 10px; font-size: 12px; }
-  }
-
-  @media (min-width: 601px) and (max-width: 900px) {
-    /* TABLET: Medium characters, moderate spacing */
-    .sphinx-character { width: 200px; height: 280px; right: 20px; bottom: 25px; }
-    .traveler-character { width: 145px; height: 235px; left: 20px; bottom: 25px; }
-
-    /* Tablet: Speech bubbles medium */
-    .sphinx-speech { width: 300px; top: 15px; right: 25px; padding: 14px 16px; font-size: 13px; }
-    .traveler-choices { width: 260px; left: 16px; top: 140px; }
-  }
-
-  @media (min-width: 901px) {
-    /* DESKTOP: Larger characters, positioned to frame center, wider layout */
-    .sphinx-character { width: 300px; height: 390px; right: 40px; bottom: 20px; }
-    .traveler-character { width: 220px; height: 320px; left: 40px; bottom: 20px; }
-
-    /* Desktop: Speech bubbles larger, more prominent */
-    .sphinx-speech { width: 420px; top: 20px; right: 60px; padding: 18px 22px; font-size: 15px; }
-    .speech-body { font-size: 15px; }
-    .speech-header { font-size: 11px; }
-    .sphinx-speech::before { bottom: -16px; left: 40px; border-left: 14px solid transparent; border-right: 14px solid transparent; border-top: 16px solid #fffef5; }
-
-    /* Desktop: Choice bubbles prominent */
-    .traveler-choices { width: 340px; left: 50px; top: 160px; }
-    .choice-bubble { padding: 13px 16px; font-size: 14px; }
-    .choice-label { font-size: 11px; }
-
-    /* Desktop: HUD larger, more visible */
-    .cinematic-hud { gap: 16px; padding: 10px 22px; }
-    .hud-meter { min-width: 85px; }
-    .hud-label { font-size: 10px; }
-    .hud-value { font-size: 12px; }
-    .hud-bar { height: 7px; }
-
-    /* Desktop: Coach panel larger */
-    .cinematic-coach { bottom: 80px; width: min(85%, 700px); padding: 16px 20px; font-size: 15px; }
-    .cinematic-coach h4 { font-size: 11px; margin-bottom: 8px; }
-
-    /* Desktop: Exit button normal */
-    .cinematic-exit-btn { padding: 7px 14px; font-size: 14px; }
+    /* Minor layout-only adjustments: margin and corner radius for narrow screens */
+    .oasis-scene { margin: 0 -12px 16px; border-radius: 12px; }
   }
 
   .wrap { max-width: 900px; margin: 0 auto; padding: 40px 24px 100px; }
